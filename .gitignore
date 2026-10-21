@@ -1,0 +1,13 @@
+# Godot 4+
+.godot/
+/android/
+
+# 내보내기 결과물
+/build/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Claude Code 개인 설정
+.claude/settings.local.json
