@@ -35,7 +35,7 @@ func _ready() -> void:
 	add_to_group("resettable")
 	_coyote_ticks = int(coyote_seconds * Engine.physics_ticks_per_second)
 	_jump_buffer_ticks = int(jump_buffer_seconds * Engine.physics_ticks_per_second)
-	reset()
+	# 첫 reset()은 Main이 레벨을 붙이고 SpawnPoint를 넘겨준 뒤 restart_stage로 한다.
 
 
 func _physics_process(delta: float) -> void:

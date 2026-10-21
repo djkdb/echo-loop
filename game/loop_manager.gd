@@ -11,6 +11,8 @@ extends Node
 signal loop_ended(loop_index: int)
 ## Shift+R로 스테이지를 처음부터 다시 시작했을 때(리셋 직전) 발생.
 signal stage_restarted
+## 지금의 나가 출구에 닿았을 때. 이후 타이머가 멈추고 R/Shift+R로만 다시 시작한다.
+signal stage_cleared
 
 @export var loop_seconds: float = 10.0
 @export var max_ghosts: int = 2
@@ -22,6 +24,7 @@ var loop_ticks: int = 0
 ## 이번 루프에서 지난 물리 틱 수 (0 ~ loop_ticks).
 var tick: int = 0
 var loop_index: int = 1
+var cleared: bool = false
 
 var _ghosts: Array[Ghost] = []
 
@@ -31,6 +34,11 @@ func _ready() -> void:
 
 
 func _physics_process(_delta: float) -> void:
+	if cleared:
+		if Input.is_action_just_pressed("restart_stage") or Input.is_action_just_pressed("end_loop", true):
+			restart_stage()
+		return
+
 	# restart_stage(Shift+R)를 먼저 본다. end_loop는 exact match라 Shift+R에는 반응하지 않지만,
 	# 순서를 정해 두면 한 틱에 두 처리가 겹칠 일이 없다.
 	if Input.is_action_just_pressed("restart_stage"):
@@ -51,6 +59,7 @@ func end_loop() -> void:
 
 func restart_stage() -> void:
 	loop_index = 1
+	cleared = false
 	for ghost: Ghost in _ghosts:
 		# queue_free만 하면 프레임 끝까지 트리·물리 공간에 남아 reset 대상이 되고 밟힐 수도 있다.
 		# 먼저 트리에서 빼서 즉시 물리 공간에서도 사라지게 한다.
@@ -59,6 +68,13 @@ func restart_stage() -> void:
 	_ghosts.clear()
 	stage_restarted.emit()
 	_reset_all()
+
+
+func clear_stage() -> void:
+	if cleared:
+		return
+	cleared = true
+	stage_cleared.emit()
 
 
 func ghost_count() -> int:

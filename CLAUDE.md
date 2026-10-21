@@ -54,7 +54,8 @@ res://
 ├─ objects/     pressure_plate, door, lever, moving_platform … (씬+스크립트 같은 폴더)
 ├─ levels/      level_1_1.tscn, level_1_2.tscn …
 ├─ ui/          hud.tscn/.gd
-└─ autoload/    replay_io.gd
+├─ autoload/    replay_io.gd
+└─ assets/      fonts/ (Noto Sans KR, OFL — 프로젝트 기본 폰트)
 ```
 
 씬과 그 스크립트는 같은 폴더에 같은 이름으로 둔다.
