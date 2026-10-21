@@ -11,13 +11,14 @@ config_version=5
 [application]
 
 config/name="Echo Loop"
-run/main_scene="uid://bewplgn50p2le"
+run/main_scene="uid://dpqv1gyde8368"
 config/features=PackedStringArray("4.7", "GL Compatibility")
 
 [autoload]
 
 ReplayIO="*res://autoload/replay_io.gd"
 Sfx="*res://autoload/sfx.gd"
+Progress="*res://autoload/progress.gd"
 
 [display]
 

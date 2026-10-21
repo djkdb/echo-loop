@@ -41,8 +41,15 @@ func run_case() -> void:
 	pass
 
 
+## 테스트가 실제 클리어 기록(user://progress.json)을 건드리지 않게 쓰는 파일.
+const TEST_PROGRESS_PATH: String = "user://test_progress.json"
+
+
 func start() -> void:
 	release_all()
+	Progress.path = TEST_PROGRESS_PATH
+	Progress.best = {}
+	Progress.pending_stage = ""
 	main = load("res://game/main.tscn").instantiate()
 	main.level_scene = load(test_level())
 	add_child(main)
