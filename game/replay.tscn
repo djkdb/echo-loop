@@ -1,0 +1,20 @@
+[gd_scene format=3 uid="uid://m1elaruej3ys"]
+
+[ext_resource type="Script" uid="uid://c3dvn8acrsoa5" path="res://game/replay.gd" id="1_replay"]
+[ext_resource type="PackedScene" uid="uid://rm4fyujolkha" path="res://actors/ghost.tscn" id="2_ghost"]
+[ext_resource type="Script" uid="uid://dniyiogner3fw" path="res://game/reels_mode.gd" id="3_reels"]
+
+[node name="Replay" type="Node2D"]
+script = ExtResource("1_replay")
+ghost_scene = ExtResource("2_ghost")
+
+[node name="Level" type="Node2D" parent="."]
+
+[node name="Ghosts" type="Node2D" parent="."]
+
+[node name="Camera" type="Camera2D" parent="."]
+position = Vector2(360, 640)
+
+[node name="ReelsMode" type="Node" parent="." node_paths=PackedStringArray("camera")]
+script = ExtResource("3_reels")
+camera = NodePath("../Camera")

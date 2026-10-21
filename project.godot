@@ -14,12 +14,18 @@ config/name="Echo Loop"
 run/main_scene="uid://bewplgn50p2le"
 config/features=PackedStringArray("4.7", "GL Compatibility")
 
+[autoload]
+
+ReplayIO="*res://autoload/replay_io.gd"
+
 [display]
 
 window/size/viewport_width=720
 window/size/viewport_height=1280
 window/size/window_width_override=360
 window/size/window_height_override=640
+window/size/window_width_override.movie=0
+window/size/window_height_override.movie=0
 window/stretch/mode="canvas_items"
 window/stretch/aspect="keep"
 

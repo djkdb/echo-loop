@@ -22,6 +22,8 @@ var alive: bool = true
 var benched: bool = false
 ## 이번 루프에서 붕괴한 틱(루프 타임라인 표시용). 붕괴 안 했으면 -1.
 var collapsed_at_tick: int = -1
+## 리플레이에서 "지금의 나" 루프를 고스트로 재생할 때: 흰 불투명 몸, 번호 배지 없음.
+var me_style: bool = false
 ## 이번 틱에 가기로 한 위치. sync_to_physics라 global_position은 물리 스텝 뒤에야 따라오므로,
 ## 리셋 직후 겹침 판정처럼 "지금 어디로 가 있는가"가 필요하면 이 값을 쓴다.
 var replay_position: Vector2 = Vector2.ZERO
@@ -56,9 +58,14 @@ func _ready() -> void:
 	add_to_group("resettable")
 	# Player가 루프 시작 때 겹친 고스트를 찾아 잠시 통과시키는 데 쓴다.
 	add_to_group("ghosts")
-	var color: Color = Palette.ghost(number)
+	var color: Color = Palette.ME if me_style else Palette.ghost(number)
 	_body.body_color = color
-	_body.eye_color = color
+	_body.eye_color = Palette.BG if me_style else color
+	if me_style:
+		_body.fill_alpha = 1.0
+		_body.outline_width = 0.0
+		_badge.visible = false
+		$Trail.visible = false
 	_badge.polygon = _badge_circle(11.0)
 	_badge.color = color
 	_number_label.text = str(number)
