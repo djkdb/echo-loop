@@ -1,6 +1,8 @@
 [gd_scene format=3 uid="uid://bbhw52j86weeg"]
 
 [ext_resource type="Script" uid="uid://bjhe2kuedlu8j" path="res://ui/hud.gd" id="1_hud"]
+[ext_resource type="Script" uid="uid://dqtxr8hnxwl5v" path="res://ui/ghost_slots.gd" id="2_slots"]
+[ext_resource type="Script" uid="uid://dejvep1pwtqhy" path="res://ui/timeline.gd" id="3_timeline"]
 
 [node name="HUD" type="CanvasLayer"]
 script = ExtResource("1_hud")
@@ -49,6 +51,31 @@ theme_override_font_sizes/font_size = 44
 text = "나 ×1"
 horizontal_alignment = 1
 vertical_alignment = 1
+
+[node name="GhostSlots" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 0
+offset_left = 40.0
+offset_top = 76.0
+offset_right = 180.0
+offset_bottom = 104.0
+mouse_filter = 2
+script = ExtResource("2_slots")
+
+[node name="Timeline" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 40.0
+offset_top = -80.0
+offset_right = -40.0
+offset_bottom = -8.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+script = ExtResource("3_timeline")
 
 [node name="ClearPanel" type="Control" parent="."]
 visible = false

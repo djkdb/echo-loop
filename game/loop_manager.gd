@@ -28,6 +28,9 @@ var tick: int = 0
 var loop_index: int = 1
 var cleared: bool = false
 
+## 다음 녹화로 덮어쓸 고스트 번호(0 = 없음). 고른 고스트는 그동안 빠져 있다(benched).
+var overwrite_target: int = 0
+
 var _ghosts: Array[Ghost] = []
 ## 레이저 등이 틱 중간에 실패를 알리면 표시만 해 두고, 이 노드 차례(틱 끝)에 리셋한다.
 ## 중간에 바로 리셋하면 같은 틱에 tick이 1 올라가 다음 루프 녹화 길이가 loop_ticks와 어긋난다.
@@ -49,6 +52,13 @@ func _physics_process(_delta: float) -> void:
 	if Input.is_action_just_pressed("restart_stage"):
 		restart_stage()
 		return
+	if Input.is_action_just_pressed("undo_ghost"):
+		undo_ghost()
+		return
+	for n: int in range(1, 5):
+		if Input.is_action_just_pressed("select_ghost_%d" % n):
+			select_ghost(n)
+			return
 	if _fail_pending:
 		_fail_pending = false
 		loop_failed.emit()
@@ -62,8 +72,34 @@ func _physics_process(_delta: float) -> void:
 
 func end_loop() -> void:
 	loop_index += 1
-	_spawn_ghost()
+	if overwrite_target > 0:
+		_overwrite_ghost()
+	else:
+		_spawn_ghost()
 	loop_ended.emit(loop_index)
+	_reset_all()
+
+
+## 마지막 고스트를 지우고 지금 루프를 처음부터 다시 한다.
+func undo_ghost() -> void:
+	if _ghosts.is_empty():
+		return
+	var ghost: Ghost = _ghosts.pop_back()
+	if overwrite_target == ghost.number:
+		overwrite_target = 0
+	ghosts_root.remove_child(ghost)
+	ghost.queue_free()
+	loop_index = maxi(loop_index - 1, 1)
+	_reset_all()
+
+
+## n번 고스트를 다음 녹화로 덮어쓰도록 고른다(이미 골랐으면 취소). 고른 고스트는 빠진 채로 루프를 처음부터 다시 한다.
+func select_ghost(n: int) -> void:
+	if n > _ghosts.size():
+		return
+	overwrite_target = 0 if overwrite_target == n else n
+	for ghost: Ghost in _ghosts:
+		ghost.benched = ghost.number == overwrite_target
 	_reset_all()
 
 
@@ -71,6 +107,7 @@ func restart_stage() -> void:
 	loop_index = 1
 	cleared = false
 	_fail_pending = false
+	overwrite_target = 0
 	for ghost: Ghost in _ghosts:
 		# queue_free만 하면 프레임 끝까지 트리·물리 공간에 남아 reset 대상이 되고 밟힐 수도 있다.
 		# 먼저 트리에서 빼서 즉시 물리 공간에서도 사라지게 한다.
@@ -117,6 +154,18 @@ func _spawn_ghost() -> void:
 	ghost.setup(player.recording.duplicate(true), _ghosts.size() + 1)
 	ghosts_root.add_child(ghost)
 	_ghosts.append(ghost)
+
+
+func _overwrite_ghost() -> void:
+	var ghost: Ghost = _ghosts[overwrite_target - 1]
+	overwrite_target = 0
+	ghost.benched = false
+	if not player.recording.is_empty():
+		ghost.setup(player.recording.duplicate(true), ghost.number)
+
+
+func ghosts() -> Array[Ghost]:
+	return _ghosts
 
 
 func _reset_all() -> void:

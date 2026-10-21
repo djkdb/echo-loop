@@ -18,6 +18,10 @@ const BLOCK_TOLERANCE: float = 0.5
 
 var number: int = 1
 var alive: bool = true
+## 덮어쓰기 대상으로 골라져 이번 루프는 빠져 있는 상태(숨김·충돌 없음·누르지 않음).
+var benched: bool = false
+## 이번 루프에서 붕괴한 틱(루프 타임라인 표시용). 붕괴 안 했으면 -1.
+var collapsed_at_tick: int = -1
 ## 이번 틱에 가기로 한 위치. sync_to_physics라 global_position은 물리 스텝 뒤에야 따라오므로,
 ## 리셋 직후 겹침 판정처럼 "지금 어디로 가 있는가"가 필요하면 이 값을 쓴다.
 var replay_position: Vector2 = Vector2.ZERO
@@ -32,7 +36,8 @@ var _tick: int = 0
 @onready var _number_label: Label = $NumberLabel
 
 
-## 트리에 넣기 전에 호출한다. frames는 이미 깊은 복사된 녹화여야 한다(Player가 리셋 때 원본을 비움).
+## 트리에 넣기 전에 호출한다(덮어쓰기 때는 트리 안에서 다시 부르고 바로 reset된다).
+## frames는 이미 깊은 복사된 녹화여야 한다(Player가 리셋 때 원본을 비움).
 func setup(frames: Array[Dictionary], ghost_number: int) -> void:
 	_frames = frames
 	number = ghost_number
@@ -80,15 +85,21 @@ func _physics_process(_delta: float) -> void:
 
 
 ## 끼임 판정 등에서 쓰는 몸 모양(Player·고스트 공용 body_shape.tres).
+## 녹화(읽기 전용으로 쓸 것). 루프 타임라인이 점프·interact 틱을 읽는다.
+func frames() -> Array[Dictionary]:
+	return _frames
+
+
 func body_shape() -> Shape2D:
 	return _shape.shape
 
 
 func reset() -> void:
 	_tick = 0
-	alive = true
-	show()
-	_shape.disabled = false
+	collapsed_at_tick = -1
+	alive = not benched
+	visible = not benched
+	_shape.disabled = benched
 	if _frames.is_empty():
 		return
 	global_position = _frames[0]["pos"]
@@ -101,6 +112,7 @@ func collapse() -> void:
 	if not alive:
 		return
 	alive = false
+	collapsed_at_tick = _tick
 	hide()
 	# 숨기기만 하면 보이지 않는 발판이 남는다. 같은 틱에 Player가 밟지 못하도록 충돌도 즉시 끈다.
 	_shape.disabled = true

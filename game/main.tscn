@@ -24,5 +24,6 @@ player = NodePath("../Player")
 ghosts_root = NodePath("../Ghosts")
 ghost_scene = ExtResource("4_ghost")
 
-[node name="HUD" parent="." node_paths=PackedStringArray("loop_manager") instance=ExtResource("3_hud")]
+[node name="HUD" parent="." node_paths=PackedStringArray("loop_manager", "player") instance=ExtResource("3_hud")]
 loop_manager = NodePath("../LoopManager")
+player = NodePath("../Player")
