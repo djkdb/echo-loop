@@ -22,5 +22,5 @@ func load_level(scene: PackedScene) -> void:
 	_level_root.add_child(level)
 	_player.spawn_point = level.spawn_point
 	level.exit.reached.connect(_loop_manager.clear_stage)
-	# 레벨이 붙은 뒤에 한 번 전체 리셋해야 Player가 이 레벨의 SpawnPoint에서 시작한다.
-	_loop_manager.restart_stage()
+	# 레벨이 붙은 뒤에 시작해야 Player가 이 레벨의 SpawnPoint에서, 이 레벨의 루프 설정으로 시작한다.
+	_loop_manager.start_level(level)

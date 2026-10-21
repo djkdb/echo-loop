@@ -52,14 +52,19 @@ res://
 ├─ game/        main.tscn, loop_manager.gd
 ├─ actors/      player.tscn/.gd, ghost.tscn/.gd
 ├─ objects/     pressure_plate, door, lever, moving_platform … (씬+스크립트 같은 폴더)
-├─ levels/      level_1_1.tscn, level_1_2.tscn …
+├─ levels/      level.gd, level_1_1.tscn, level_1_2.tscn …
 ├─ ui/          hud.tscn/.gd
 ├─ autoload/    replay_io.gd
 └─ assets/      fonts/ (Noto Sans KR, OFL — 프로젝트 기본 폰트)
 ```
 
 씬과 그 스크립트는 같은 폴더에 같은 이름으로 둔다.
+단, `levels/level.gd`는 모든 레벨 공용 스크립트(같은 이름 규칙의 예외)다. 루프 길이·고스트 상한도 여기 export로 레벨마다 정한다.
 스크립트 옆에 생기는 `.uid` 파일은 지우지 말고 같이 커밋한다.
+
+## 레벨 배치
+
+- 각 레벨 위쪽 **y 240~440은 릴스 텍스트 자리**로 비워 둔다(지형·오브젝트를 두지 않는다). 그 위 y 0~240은 HUD 자리.
 
 ## 입력 액션 (project.godot에 등록된 이름 그대로 사용)
 

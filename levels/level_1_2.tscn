@@ -24,6 +24,7 @@ size = Vector2(40, 560)
 script = ExtResource("1_level")
 spawn_point = NodePath("SpawnPoint")
 exit = NodePath("Exit")
+max_ghosts = 1
 
 [node name="Background" type="Polygon2D" parent="."]
 color = Color(0.17, 0.17, 0.18, 1)

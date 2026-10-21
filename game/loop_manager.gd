@@ -14,23 +14,19 @@ signal stage_restarted
 ## 지금의 나가 출구에 닿았을 때. 이후 타이머가 멈추고 R/Shift+R로만 다시 시작한다.
 signal stage_cleared
 
-@export var loop_seconds: float = 10.0
-@export var max_ghosts: int = 2
 @export var player: Player
 @export var ghosts_root: Node2D
 @export var ghost_scene: PackedScene
 
+## start_level()에서 레벨 값으로 정해진다.
 var loop_ticks: int = 0
+var max_ghosts: int = 0
 ## 이번 루프에서 지난 물리 틱 수 (0 ~ loop_ticks).
 var tick: int = 0
 var loop_index: int = 1
 var cleared: bool = false
 
 var _ghosts: Array[Ghost] = []
-
-
-func _ready() -> void:
-	loop_ticks = int(loop_seconds * Engine.physics_ticks_per_second)
 
 
 func _physics_process(_delta: float) -> void:
@@ -68,6 +64,13 @@ func restart_stage() -> void:
 	_ghosts.clear()
 	stage_restarted.emit()
 	_reset_all()
+
+
+## 레벨의 루프 길이·고스트 상한을 읽고 스테이지를 처음부터 시작한다.
+func start_level(level: Level) -> void:
+	loop_ticks = int(level.loop_seconds * Engine.physics_ticks_per_second)
+	max_ghosts = level.max_ghosts
+	restart_stage()
 
 
 func clear_stage() -> void:
