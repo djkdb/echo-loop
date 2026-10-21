@@ -1,0 +1,95 @@
+[gd_scene format=3 uid="uid://1ivmfjshls22"]
+
+[ext_resource type="Script" uid="uid://d0t6pnrne08kt" path="res://levels/level.gd" id="1_level"]
+[ext_resource type="PackedScene" uid="uid://curqtt3tkxrfw" path="res://objects/exit.tscn" id="2_exit"]
+[ext_resource type="PackedScene" uid="uid://8rtice17j7mo" path="res://objects/pressure_plate.tscn" id="3_plate"]
+[ext_resource type="PackedScene" uid="uid://dsujc8w3yu1r7" path="res://objects/moving_platform.tscn" id="4_platform"]
+
+[sub_resource type="RectangleShape2D" id="Shape_Ceiling"]
+size = Vector2(440, 40)
+
+[sub_resource type="RectangleShape2D" id="Shape_Floor"]
+size = Vector2(440, 40)
+
+[sub_resource type="RectangleShape2D" id="Shape_LeftWall"]
+size = Vector2(40, 560)
+
+[sub_resource type="RectangleShape2D" id="Shape_RightWall"]
+size = Vector2(40, 560)
+
+[sub_resource type="RectangleShape2D" id="Shape_Shelf"]
+size = Vector2(270, 20)
+
+[node name="Level2_1" type="Node2D" node_paths=PackedStringArray("spawn_point", "exit")]
+script = ExtResource("1_level")
+spawn_point = NodePath("SpawnPoint")
+exit = NodePath("Exit")
+loop_seconds = 10
+max_ghosts = 2
+camera_zoom = 1.5
+
+[node name="Room" type="Node2D" parent="."]
+
+[node name="Ceiling" type="StaticBody2D" parent="Room"]
+position = Vector2(220, -20)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Room/Ceiling"]
+shape = SubResource("Shape_Ceiling")
+
+[node name="Polygon2D" type="Polygon2D" parent="Room/Ceiling"]
+color = Color(0.5, 0.5, 0.5, 1)
+polygon = PackedVector2Array(-220, -20, 220, -20, 220, 20, -220, 20)
+
+[node name="Floor" type="StaticBody2D" parent="Room"]
+position = Vector2(220, 500)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Room/Floor"]
+shape = SubResource("Shape_Floor")
+
+[node name="Polygon2D" type="Polygon2D" parent="Room/Floor"]
+color = Color(0.5, 0.5, 0.5, 1)
+polygon = PackedVector2Array(-220, -20, 220, -20, 220, 20, -220, 20)
+
+[node name="LeftWall" type="StaticBody2D" parent="Room"]
+position = Vector2(-20, 240)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Room/LeftWall"]
+shape = SubResource("Shape_LeftWall")
+
+[node name="Polygon2D" type="Polygon2D" parent="Room/LeftWall"]
+color = Color(0.5, 0.5, 0.5, 1)
+polygon = PackedVector2Array(-20, -280, 20, -280, 20, 280, -20, 280)
+
+[node name="RightWall" type="StaticBody2D" parent="Room"]
+position = Vector2(460, 240)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Room/RightWall"]
+shape = SubResource("Shape_RightWall")
+
+[node name="Polygon2D" type="Polygon2D" parent="Room/RightWall"]
+color = Color(0.5, 0.5, 0.5, 1)
+polygon = PackedVector2Array(-20, -280, 20, -280, 20, 280, -20, 280)
+
+[node name="Shelf" type="StaticBody2D" parent="Room"]
+position = Vector2(135, 110)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Room/Shelf"]
+shape = SubResource("Shape_Shelf")
+
+[node name="Polygon2D" type="Polygon2D" parent="Room/Shelf"]
+color = Color(0.5, 0.5, 0.5, 1)
+polygon = PackedVector2Array(-135, -10, 135, -10, 135, 10, -135, 10)
+
+[node name="PressurePlate" parent="." instance=ExtResource("3_plate")]
+position = Vector2(120, 480)
+
+[node name="Lift" parent="." instance=ExtResource("4_platform")]
+position = Vector2(330, 490)
+sources = Array[NodePath]([NodePath("../PressurePlate")])
+travel = Vector2(0, -384)
+
+[node name="Exit" parent="." instance=ExtResource("2_exit")]
+position = Vector2(40, 100)
+
+[node name="SpawnPoint" type="Marker2D" parent="."]
+position = Vector2(30, 440)
