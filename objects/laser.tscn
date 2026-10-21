@@ -1,0 +1,26 @@
+[gd_scene format=3 uid="uid://ddibtin067sfm"]
+
+[ext_resource type="Script" uid="uid://dqasj6h474bu7" path="res://objects/laser.gd" id="1_laser"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_beam"]
+size = Vector2(10, 8)
+
+[node name="Laser" type="Node2D"]
+process_physics_priority = 25
+script = ExtResource("1_laser")
+
+[node name="Beam" type="Area2D" parent="."]
+collision_layer = 8
+collision_mask = 6
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Beam"]
+shape = SubResource("RectangleShape2D_beam")
+
+[node name="BeamLine" type="Line2D" parent="."]
+points = PackedVector2Array(0, 0, 10, 0)
+width = 6.0
+default_color = Color(1, 0.25, 0.3, 0.9)
+
+[node name="Emitter" type="Polygon2D" parent="."]
+color = Color(0.55, 0.2, 0.25, 1)
+polygon = PackedVector2Array(-12, -12, 4, -12, 4, 12, -12, 12)

@@ -13,6 +13,8 @@ signal loop_ended(loop_index: int)
 signal stage_restarted
 ## 지금의 나가 출구에 닿았을 때. 이후 타이머가 멈추고 R/Shift+R로만 다시 시작한다.
 signal stage_cleared
+## 지금의 나가 레이저에 닿아 루프가 실패했을 때(리셋 직전). 이번 녹화는 고스트로 남지 않는다.
+signal loop_failed
 
 @export var player: Player
 @export var ghosts_root: Node2D
@@ -27,6 +29,13 @@ var loop_index: int = 1
 var cleared: bool = false
 
 var _ghosts: Array[Ghost] = []
+## 레이저 등이 틱 중간에 실패를 알리면 표시만 해 두고, 이 노드 차례(틱 끝)에 리셋한다.
+## 중간에 바로 리셋하면 같은 틱에 tick이 1 올라가 다음 루프 녹화 길이가 loop_ticks와 어긋난다.
+var _fail_pending: bool = false
+
+
+func _ready() -> void:
+	add_to_group("loop_manager")
 
 
 func _physics_process(_delta: float) -> void:
@@ -39,6 +48,11 @@ func _physics_process(_delta: float) -> void:
 	# 순서를 정해 두면 한 틱에 두 처리가 겹칠 일이 없다.
 	if Input.is_action_just_pressed("restart_stage"):
 		restart_stage()
+		return
+	if _fail_pending:
+		_fail_pending = false
+		loop_failed.emit()
+		_reset_all()
 		return
 
 	tick += 1
@@ -56,6 +70,7 @@ func end_loop() -> void:
 func restart_stage() -> void:
 	loop_index = 1
 	cleared = false
+	_fail_pending = false
 	for ghost: Ghost in _ghosts:
 		# queue_free만 하면 프레임 끝까지 트리·물리 공간에 남아 reset 대상이 되고 밟힐 수도 있다.
 		# 먼저 트리에서 빼서 즉시 물리 공간에서도 사라지게 한다.
@@ -71,6 +86,12 @@ func start_level(level: Level) -> void:
 	loop_ticks = int(level.loop_seconds * Engine.physics_ticks_per_second)
 	max_ghosts = level.max_ghosts
 	restart_stage()
+
+
+## 이번 루프를 실패로 끝낸다(녹화 저장 안 함, 루프 번호 그대로). 실제 리셋은 이번 틱 끝에.
+func fail_loop() -> void:
+	if not cleared:
+		_fail_pending = true
 
 
 func clear_stage() -> void:
