@@ -12,7 +12,7 @@
 
 ## 기술 스택 (바꾸지 말 것)
 
-- Godot 4.x 안정판, **GDScript만** 사용 (C# 금지: 웹 빌드 제약)
+- Godot 4.7 안정판, **GDScript만** 사용 (C# 금지: 웹 빌드 제약)
 - 렌더러: **Compatibility** (웹·모바일 브라우저 대응)
 - 뷰포트 720×1280, Stretch Mode `canvas_items`, Aspect `keep`
 - Physics Ticks Per Second: 60
