@@ -40,7 +40,8 @@
 
 ## 배포
 
-- **폰트 서브셋**: `assets/fonts/NotoSansKR-Bold.otf` 4.6MB → 필요한 글자만 남겨 약 1MB. 웹 배포 직전에.
+- ~~폰트 서브셋~~ → **해결(phase-c C5)**: `tools/subset_font.py`로 상용 한글 2,350자 + 기호 + 프로젝트에 쓰인 글자만 남겨
+  4.8MB → 358KB. 상용 밖 글자를 새 문구에 쓰면 원본(Google Fonts Noto Sans KR Bold)으로 다시 돌린다.
 
 ## 연출
 
@@ -52,4 +53,5 @@
 
 - ~~자동 테스트가 저장소 밖에 있다.~~ → **해결**: `tests/run_all.gd`(SceneTree 스크립트, GdUnit4 없음).
   `godot --headless --path . -s tests/run_all.gd` 한 줄로 전부 돌고 실패하면 종료 코드 1.
-  - 웹 내보내기 프리셋을 만들 때 `tests/*`를 제외 필터에 넣는다.
+  - ~~웹 내보내기 프리셋에서 `tests/*` 제외~~ → **해결(C5)**: `export_presets.cfg` "Web"의 제외 필터
+    `tests/*, solutions/*, tools/*, docs/*, build/*`.
