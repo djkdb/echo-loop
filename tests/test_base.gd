@@ -205,6 +205,8 @@ const INPUT_ACTIONS: Array[String] = ["move_left", "move_right", "jump", "intera
 var sol_inputs: Array = []
 var sol_end_at: Array = []
 var sol_runs: Array = []
+## 봇 디버깅: 환경 변수 BOT_TRACE=1이면 record_loop가 6틱마다 위치를 찍는다.
+var _trace: bool = OS.get_environment("BOT_TRACE") != ""
 
 
 ## 지금 눌린 입력을 한 글자(16진수 비트: 1 왼쪽, 2 오른쪽, 4 점프, 8 상호작용)로.
@@ -225,13 +227,19 @@ func apply_code(code: String) -> void:
 			Input.action_release(INPUT_ACTIONS[i])
 
 
-## run_loop와 같고, 매 틱 hook이 정한 입력을 기록해 둔다(봇 전용). 루프가 고스트가 됐으면 그 녹화, CLEAR면 지금의 나 녹화를 남긴다.
+## run_loop와 같고, 매 틱 hook이 정한 입력을 기록해 둔다(봇 전용). 첫 틱(t = 0)에는 입력하지 않는다. 루프가 고스트가 됐으면 그 녹화, CLEAR면 지금의 나 녹화를 남긴다.
 func record_loop(on_tick: Callable, end_at: int = -1, max_ticks: int = 2000) -> Array:
 	var codes: PackedStringArray = []
 	var n_ghosts: int = lm.ghost_count()
 	var log: Array = await run_loop(func(t: int) -> void:
-		if on_tick.is_valid():
+		# 첫 틱엔 모두 뗀다: 리셋 순간 누르고 있던 키는 한 번 뗄 때까지 무시되므로(Player 규칙)
+		# 앞 루프 끝에 누르던 키를 그대로 누르면 이번 루프 내내 안 먹는다.
+		if t == 0:
+			release_all()
+		elif on_tick.is_valid():
 			on_tick.call(t)
+		if _trace and t % 6 == 0:
+			print("    t=%d loop=%d p=%s floor=%s in=%s" % [t, lm.loop_index, player.global_position, player.is_on_floor(), input_code()])
 		codes.append(input_code()), end_at, max_ticks)
 	sol_inputs.append("".join(codes))
 	sol_end_at.append(end_at)

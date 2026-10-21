@@ -2,7 +2,7 @@ extends "res://tests/test_base.gd"
 ## 정답 리플레이 검증(챕터별 케이스가 상속해 stages()를 정한다). solutions/<stage>.json마다:
 ## 1) 저장된 입력을 실제 게임에 넣으면 같은 녹화가 나오고 CLEAR된다(= 클리어 가능, 레벨을 고쳐 답이 깨지면 여기서 걸린다).
 ## 2) 고스트 수 ≤ 레벨 상한.
-## 3) 정답의 고스트를 하나씩 빼고(나머지는 녹화 그대로) 마지막 루프를 다시 하면 CLEAR되지 않는다
+## 3) 정답에서 루프 하나를 빼고 나머지 입력을 그대로 재생하면 CLEAR되지 않는다
 ##    (= 이 답에서 고스트 하나라도 적으면 안 된다). 전역 최소임은 레벨 설계 근거로 보장한다(docs/levels.md).
 
 const POS_TOLERANCE: float = 0.01
@@ -43,15 +43,16 @@ func _verify(stage: String) -> void:
 		same = same and _same_path(got, runs[i])
 	check("%s: stored inputs reproduce the stored runs" % stage, same)
 	check("%s: stored inputs CLEAR the stage" % stage, lm.cleared)
+	# 루프 하나를 통째로 빼고 나머지 입력을 그대로 재생: 그 고스트가 마지막 루프에서든 다른 고스트를 녹화할 때든
+	# 필요했다면 CLEAR되지 않는다(예: 2-5 파랑 문은 녹화 때만 열려 있으면 된다).
 	for skip in n:
 		await restart()
-		var rest: Array = []
-		for j in n:
+		for j in inputs.size():
 			if j != skip:
-				rest.append(runs[j])
-		inject_ghosts(rest)
-		await play_inputs(inputs[n], -1, lm.loop_ticks + 5)
-		check("%s: without ghost %d the final run does not CLEAR" % [stage, skip + 1], not lm.cleared)
+				await play_inputs(inputs[j], int(doc["end_at"][j]) if j < n else -1, lm.loop_ticks + 5)
+			if lm.cleared:
+				break
+		check("%s: without loop %d (ghost %d) the rest of the inputs do not CLEAR" % [stage, skip + 1, skip + 1], not lm.cleared)
 
 
 func _same_path(a: Array, b: Array) -> bool:
