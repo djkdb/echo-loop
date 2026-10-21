@@ -61,6 +61,17 @@ func run_case() -> void:
 	check("2) benched ghost no longer blocks the beam", benched_beam.size() == 1 and benched_beam[0][0] and absf(benched_beam[0][1] - 150.0) < 1.0, str(benched_beam))
 	lm.select_ghost(1)
 
+	# 발사구 위에 선 고스트(빔 시작점이 몸 안)도 빔을 완전히 막는다(2-3 "방패")
+	await restart()
+	await run_loop(func(t: int) -> void: steer_to(250.0), 80)
+	var cover: Array = []
+	await run_loop(func(t: int) -> void:
+		steer_to(170.0)
+		if t == 10: Input.action_press("interact")
+		if t == 12: Input.action_release("interact")
+		if t == 150: cover.append([laser.is_on, laser.beam_length]), 200)
+	check("ghost standing on the emitter blocks the whole beam", cover.size() == 1 and cover[0][0] and cover[0][1] < 1.0, str(cover))
+
 	# 3) 닫힌 문이 빔을 막고, 열리면 통과
 	remove(laser)
 	var plate: PressurePlate = add_obj("res://objects/pressure_plate.tscn", Vector2(200, 1200))
@@ -76,3 +87,4 @@ func run_case() -> void:
 		if t == 60: open_len[0] = laser2.beam_length, 70)
 	check("3) closed door blocks the beam", absf(closed_len - 30.0) < 1.0, "len=%.1f" % closed_len)
 	check("3) open door lets the beam through", absf(open_len[0] - 150.0) < 1.0, "len=%.1f" % open_len[0])
+

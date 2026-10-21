@@ -57,6 +57,8 @@ func _update_beam() -> void:
 	var dir: Vector2 = direction.normalized()
 	# world(1) + ghost(3): 고스트가 빔을 막는다.
 	var query := PhysicsRayQueryParameters2D.create(global_position, global_position + dir * max_length, 1 | 4)
+	# 발사구 위에 선 고스트(빔 시작점이 몸 안)도 빔을 막아야 한다. 기본값이면 안쪽에서 시작한 광선은 그 몸을 무시한다.
+	query.hit_from_inside = true
 	var hit: Dictionary = get_world_2d().direct_space_state.intersect_ray(query)
 	beam_length = global_position.distance_to(hit["position"]) if not hit.is_empty() else max_length
 	var rect := _beam_shape.shape as RectangleShape2D
