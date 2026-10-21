@@ -1,5 +1,6 @@
 [gd_scene format=3 uid="uid://ddibtin067sfm"]
 
+[ext_resource type="Material" uid="uid://cs32bp30a6en1" path="res://assets/fx/additive.tres" id="2_add"]
 [ext_resource type="Script" uid="uid://dqasj6h474bu7" path="res://objects/laser.gd" id="1_laser"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_beam"]
@@ -16,9 +17,15 @@ collision_mask = 6
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Beam"]
 shape = SubResource("RectangleShape2D_beam")
 
+[node name="BeamGlow" type="Line2D" parent="."]
+material = ExtResource("2_add")
+points = PackedVector2Array(0, 0, 10, 0)
+width = 18.0
+default_color = Color(1, 0.302, 0.4275, 0.35)
+
 [node name="BeamLine" type="Line2D" parent="."]
 points = PackedVector2Array(0, 0, 10, 0)
-width = 6.0
+width = 4.0
 default_color = Color(1, 0.302, 0.4275, 1)
 
 [node name="Emitter" type="Polygon2D" parent="."]

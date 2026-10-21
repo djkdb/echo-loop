@@ -11,6 +11,12 @@ extends StaticBody2D
 @export var inverted: bool = false
 
 var is_open: bool = false
+## 문 색(색 문은 파랑·주황으로 바꾼다).
+var tint: Color = Palette.DOOR
+
+## 연출: 0 = 닫힘, 1 = 열림. is_open을 0.15초에 걸쳐 따라간다(위로 슬라이드).
+var _open_anim: float = 0.0
+const SLIDE_SECONDS: float = 0.15
 
 var _sources: Array[Node] = []
 
@@ -23,6 +29,37 @@ func _ready() -> void:
 	add_to_group("resettable")
 	_sources = SignalSources.resolve(self, sources)
 	_set_open(inverted)
+	_open_anim = 1.0 if is_open else 0.0
+	# 에디터에서 보이라고 둔 Polygon2D는 실행 중엔 숨기고 직접 그린다.
+	_visual.visible = false
+
+
+func _process(delta: float) -> void:
+	var target: float = 1.0 if is_open else 0.0
+	if _open_anim != target:
+		_open_anim = move_toward(_open_anim, target, delta / SLIDE_SECONDS)
+		queue_redraw()
+
+
+func _draw() -> void:
+	var size: Vector2 = (_shape.shape as RectangleShape2D).size
+	var r := Rect2(-size * 0.5, size)
+	draw_rect(r, Color(tint, 0.08))
+	draw_rect(r.grow(-1.0), Color(tint, 0.25), false, 1.0)
+	# 위쪽을 붙인 채 아래 끝이 올라간다 = 위로 슬라이드
+	var h: float = size.y * (1.0 - _open_anim)
+	if h > 0.5:
+		var door := Rect2(r.position, Vector2(size.x, h))
+		draw_rect(door, Color(tint, 0.85))
+		draw_rect(door.grow(-1.5), tint.lightened(0.3), false, 3.0)
+		for i in range(1, 4):
+			var y: float = door.position.y + door.size.y * float(i) / 4.0
+			draw_line(Vector2(r.position.x + 6, y), Vector2(r.end.x - 6, y), Color(Palette.BG, 0.35), 2.0)
+
+
+## 이 문에 연결된 소스(신호선 연출이 읽는다).
+func connected_sources() -> Array[Node]:
+	return _sources
 
 
 func _physics_process(_delta: float) -> void:
@@ -52,4 +89,3 @@ func _set_open(open: bool) -> void:
 	is_open = open
 	# 충돌을 즉시 켜고 꺼야 같은 틱 기준으로 고스트의 test_move가 문 상태를 본다.
 	_shape.disabled = open
-	_visual.modulate.a = 0.15 if open else 1.0

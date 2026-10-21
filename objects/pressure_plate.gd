@@ -15,6 +15,9 @@ var is_on: bool = false
 var _reset_frame: int = -100
 
 @onready var _visual: Node2D = $Visual
+@onready var _glow: Sprite2D = $Glow
+
+var _flash: float = 0.0
 
 
 func _ready() -> void:
@@ -52,6 +55,16 @@ func _set_on(on: bool) -> void:
 	if is_on == on:
 		return
 	is_on = on
-	# 눌린 게 보이도록 살짝 내려앉힌다.
-	_visual.position.y = 4.0 if on else 0.0
+	if on:
+		_flash = 0.1
 	toggled.emit(on)
+
+
+## 연출: 눌리면 2px 내려앉고 0.1초 번쩍인 뒤 은은한 글로우를 유지한다.
+func _process(delta: float) -> void:
+	_flash = maxf(_flash - delta, 0.0)
+	_visual.position.y = 2.0 if is_on else 0.0
+	var a: float = 0.0
+	if is_on:
+		a = 0.35 + 0.65 * (_flash / 0.1)
+	_glow.modulate.a = a

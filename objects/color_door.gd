@@ -15,5 +15,5 @@ const LAYER_GHOST_BARRIER: int = 1 << 5
 
 func _ready() -> void:
 	collision_layer = LAYER_PLAYER_BARRIER if door_color == DoorColor.BLUE else LAYER_GHOST_BARRIER
-	(_visual as Polygon2D).color = Palette.GHOSTS[0] if door_color == DoorColor.BLUE else Palette.GHOSTS[1]
+	tint = Palette.GHOSTS[0] if door_color == DoorColor.BLUE else Palette.GHOSTS[1]
 	super._ready()

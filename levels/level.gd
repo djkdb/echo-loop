@@ -11,6 +11,12 @@ extends Node2D
 
 func _ready() -> void:
 	_apply_room_style()
+	# 자식(오브젝트)의 _ready가 먼저 끝나 sources가 풀린 뒤라 신호선을 만들 수 있다.
+	var wires := SignalWires.new()
+	wires.name = "SignalWires"
+	add_child(wires)
+	move_child(wires, 1)
+	wires.build(self)
 
 
 ## 방 내부(벽 안쪽) 사각형. 바닥·천장·양쪽 벽 이름(Floor, Ceiling, LeftWall, RightWall)으로 찾고,

@@ -1,5 +1,7 @@
 [gd_scene format=3 uid="uid://8rtice17j7mo"]
 
+[ext_resource type="Material" uid="uid://cs32bp30a6en1" path="res://assets/fx/additive.tres" id="2_add"]
+[ext_resource type="Texture2D" uid="uid://dgdgoi3tghiwj" path="res://assets/fx/glow_texture.tres" id="3_glow"]
 [ext_resource type="Script" uid="uid://chstqh45fijx1" path="res://objects/pressure_plate.gd" id="1_plate"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_plate"]
@@ -20,3 +22,10 @@ shape = SubResource("RectangleShape2D_plate")
 [node name="Top" type="Polygon2D" parent="Visual"]
 color = Color(1, 0.8235, 0.2471, 1)
 polygon = PackedVector2Array(-40, -10, 40, -10, 40, 0, -40, 0)
+
+[node name="Glow" type="Sprite2D" parent="."]
+modulate = Color(1, 0.8235, 0.2471, 0)
+material = ExtResource("2_add")
+position = Vector2(0, -6)
+scale = Vector2(1.1, 0.35)
+texture = ExtResource("3_glow")

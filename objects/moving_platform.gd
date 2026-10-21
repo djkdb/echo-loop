@@ -25,6 +25,7 @@ var _active_ticks: int = 0
 var _pos: Vector2 = Vector2.ZERO
 
 @onready var _shape: CollisionShape2D = $CollisionShape2D
+@onready var _visual: CanvasItem = $Visual
 
 
 func _ready() -> void:
@@ -33,6 +34,17 @@ func _ready() -> void:
 	_sources = SignalSources.resolve(self, sources)
 	_start = global_position
 	_pos = _start
+	_visual.visible = false
+
+
+## 연출: 어두운 채움 + 보조색 외곽선 + 신호색 점 3개.
+func _draw() -> void:
+	var size: Vector2 = (_shape.shape as RectangleShape2D).size
+	var r := Rect2(-size * 0.5, size)
+	draw_rect(r, Color("#1A2036"))
+	draw_rect(r.grow(-1.0), Palette.SUB_TEXT, false, 2.0)
+	for i: int in [-1, 0, 1]:
+		draw_circle(Vector2(i * 14.0, 0), 2.5, Color(Palette.SIGNAL, 0.6))
 
 
 func _physics_process(_delta: float) -> void:
@@ -101,3 +113,8 @@ func _position_at(ticks: int) -> Vector2:
 		return _start
 	var distance: float = speed * float(ticks) / float(Engine.physics_ticks_per_second)
 	return _start + travel / length * pingpong(distance, length)
+
+
+## 연결된 소스(신호선 연출이 읽는다).
+func connected_sources() -> Array[Node]:
+	return _sources

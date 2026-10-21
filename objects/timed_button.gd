@@ -32,7 +32,6 @@ func _physics_process(_delta: float) -> void:
 		_set_on(false)
 		return
 	ticks_left -= 1
-	_timer_bar.scale.x = float(ticks_left) / float(_on_ticks)
 
 
 func interact() -> void:
@@ -42,7 +41,6 @@ func interact() -> void:
 
 func reset() -> void:
 	ticks_left = 0
-	_timer_bar.scale.x = 0.0
 	_set_on(false)
 
 
@@ -50,5 +48,10 @@ func _set_on(on: bool) -> void:
 	if is_on == on:
 		return
 	is_on = on
-	_visual.color = Palette.SIGNAL if on else Palette.SUB_TEXT
 	toggled.emit(on)
+
+
+## 연출: 켜진 동안 버튼이 신호색, 남은 시간 막대가 줄어든다.
+func _process(_delta: float) -> void:
+	_visual.color = Palette.SIGNAL if is_on else Palette.SUB_TEXT
+	_timer_bar.scale.x = float(ticks_left) / float(_on_ticks) if is_on and _on_ticks > 0 else 0.0

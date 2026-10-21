@@ -26,6 +26,7 @@ var _reset_frame: int = -100
 @onready var _beam: Area2D = $Beam
 @onready var _beam_shape: CollisionShape2D = $Beam/CollisionShape2D
 @onready var _beam_line: Line2D = $BeamLine
+@onready var _beam_glow: Line2D = $BeamGlow
 
 
 func _ready() -> void:
@@ -65,3 +66,15 @@ func _update_beam() -> void:
 	_beam_shape.disabled = not is_on
 	_beam_line.visible = is_on
 	_beam_line.points = PackedVector2Array([Vector2.ZERO, dir * beam_length])
+	_beam_glow.visible = is_on
+	_beam_glow.points = _beam_line.points
+
+
+## 연출: 빔 글로우가 살짝 숨 쉰다.
+func _process(_delta: float) -> void:
+	_beam_glow.width = 18.0 + 4.0 * sin(Time.get_ticks_msec() * 0.012)
+
+
+## 연결된 소스(신호선 연출이 읽는다).
+func connected_sources() -> Array[Node]:
+	return _sources

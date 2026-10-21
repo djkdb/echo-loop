@@ -26,6 +26,19 @@ func _ready() -> void:
 	add_to_group("resettable")
 	_start = global_position
 	box_position = _start
+	$Visual.visible = false
+	$Cross.visible = false
+
+
+## 연출: 어두운 채움 + 보조색 외곽선 + X 무늬.
+func _draw() -> void:
+	var size: Vector2 = (_shape.shape as RectangleShape2D).size
+	var r := Rect2(-size * 0.5, size)
+	draw_rect(r, Color("#161B2E"))
+	draw_rect(r.grow(-1.5), Palette.SUB_TEXT, false, 3.0)
+	var k: Rect2 = r.grow(-8.0)
+	draw_line(k.position, k.end, Color(Palette.SUB_TEXT, 0.6), 2.0)
+	draw_line(Vector2(k.end.x, k.position.y), Vector2(k.position.x, k.end.y), Color(Palette.SUB_TEXT, 0.6), 2.0)
 
 
 func _physics_process(delta: float) -> void:
