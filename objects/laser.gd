@@ -1,7 +1,8 @@
 class_name Laser
 extends Node2D
-## 레이저: 빔에 닿은 고스트는 붕괴, 지금의 나(Player)는 루프 즉시 실패(이번 녹화는 저장하지 않음).
-## 빔은 direction으로 뻗다가 world(벽·문·발판·상자)에 막힌다. sources가 있으면 "하나라도 on"일 때만 켜진다
+## 레이저: 지금의 나(Player)가 빔에 닿으면 루프 즉시 실패(이번 녹화는 저장하지 않음).
+## 빔은 direction으로 뻗다가 world(벽·문·발판·상자)나 고스트에 막힌다. 고스트는 몸으로 빔을 막는 방패이고
+## 붕괴하지 않는다(기획서 2-3 "방패"). 붕괴했거나 덮어쓰기로 빠진 고스트는 충돌이 꺼져 있어 막지 않는다. sources가 있으면 "하나라도 on"일 때만 켜진다
 ## (inverted면 반대). sources가 비어 있으면 항상 켜져 있다.
 ##
 ## 실행 순서: process_physics_priority = 25. 바디·소스·문이 이번 틱 처리를 끝낸 뒤 판정한다.
@@ -43,8 +44,6 @@ func _physics_process(_delta: float) -> void:
 	for body: Node2D in _beam.get_overlapping_bodies():
 		if body is Player:
 			get_tree().call_group("loop_manager", "fail_loop")
-		elif body is Ghost:
-			(body as Ghost).collapse()
 
 
 func reset() -> void:
@@ -55,7 +54,8 @@ func reset() -> void:
 func _update_beam() -> void:
 	is_on = _sources.is_empty() or (SignalSources.any_on(_sources) != inverted)
 	var dir: Vector2 = direction.normalized()
-	var query := PhysicsRayQueryParameters2D.create(global_position, global_position + dir * max_length, 1)
+	# world(1) + ghost(3): 고스트가 빔을 막는다.
+	var query := PhysicsRayQueryParameters2D.create(global_position, global_position + dir * max_length, 1 | 4)
 	var hit: Dictionary = get_world_2d().direct_space_state.intersect_ray(query)
 	beam_length = global_position.distance_to(hit["position"]) if not hit.is_empty() else max_length
 	var rect := _beam_shape.shape as RectangleShape2D

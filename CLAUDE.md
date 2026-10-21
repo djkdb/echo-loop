@@ -42,7 +42,8 @@
    - 몸 위치로 직접 계산하는 규칙(상자 밀기, 이동 발판 끼임)은 Player는 `global_position`, 고스트는 `replay_position`을 쓴다.
    - Area2D 겹침 목록은 리셋 직후 낡아 있으므로 리셋된 물리 프레임 + 2까지 판정에 쓰지 않는다.
 10. **상호작용(E):** Player와 고스트(녹화된 interact 틱에)가 `interactables` 그룹 중 자기와 겹친 Area2D의 `interact()`를 부른다.
-11. **루프 리셋은 틱 끝(LoopManager 차례)에만.** 중간에 실패·클리어를 알리는 쪽은 `fail_loop()`/`clear_stage()`로 표시만 한다.
+11. **레이저:** Player가 닿으면 루프 실패. 고스트는 빔을 몸으로 막는 방패라 붕괴하지 않고 빔이 고스트에서 끝난다.
+12. **루프 리셋은 틱 끝(LoopManager 차례)에만.** 중간에 실패·클리어를 알리는 쪽은 `fail_loop()`/`clear_stage()`로 표시만 한다.
 
 ## 처리 순서 (process_physics_priority, 작을수록 먼저)
 
@@ -87,7 +88,8 @@ res://
 ├─ levels/      level.gd, level_1_2.tscn, level_test*.tscn …
 ├─ ui/          hud.tscn/.gd, ghost_slots.gd, timeline.gd(hud.tscn 안 노드 스크립트)
 ├─ autoload/    replay_io.gd
-└─ assets/      fonts/ (Noto Sans KR, OFL — 프로젝트 기본 폰트)
+├─ assets/      fonts/ (Noto Sans KR, OFL — 프로젝트 기본 폰트)
+└─ tests/       run_all.gd, test_base.gd, cases/test_*.gd (자동 테스트, 내보내기에서 제외)
 ```
 
 씬과 그 스크립트는 같은 폴더에 같은 이름으로 둔다.
@@ -132,6 +134,9 @@ R과 Shift+R이 겹치므로 `end_loop`는 반드시 exact match로 검사한다
 - `project.godot` 설정을 바꿔야 하면 바꾸기 전에 무엇을 왜 바꾸는지 먼저 말할 것.
 - 커밋은 작게, 접두사 사용: `feat:` `fix:` `refactor:` `chore:`
 - Godot 실행 파일이 PATH에 있으면 `godot --headless --path . --quit-after 120` 으로 스크립트 에러가 없는지 확인한다.
+- **커밋 전 `tests/run_all.gd` 통과 필수.** `godot --headless --path . -s tests/run_all.gd`
+  (`--fixed-fps 60`을 붙이면 실시간을 기다리지 않아 30초 안팎, 하나만: `-- --only=test_12`). 실패하면 종료 코드 1.
+  새 기능·버그 수정에는 `tests/cases/`에 케이스를 추가한다(`tests/test_base.gd` 상속, `run_case()` 구현).
 
 ---
 
