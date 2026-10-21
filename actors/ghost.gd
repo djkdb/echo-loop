@@ -15,6 +15,8 @@ const COLORS: Array[Color] = Palette.GHOSTS
 ## 녹화 위치까지 이만큼(px) 이상 못 가야 "막힘"으로 본다. 녹화 위치는 표면의 safe margin(0.08px) 안쪽에
 ## 걸칠 수 있어서(예: 내려온 발판에 바닥 쪽으로 눌린 Player), 0 기준이면 환경이 같아도 붕괴가 난다.
 const BLOCK_TOLERANCE: float = 0.5
+## supports_jump에서 "같은 높이"로 보는 오차(px). 서 있는 녹화도 표면 safe margin 때문에 아주 조금 흔들릴 수 있다.
+const GROUNDED_EPSILON: float = 0.05
 
 var number: int = 1
 var alive: bool = true
@@ -125,6 +127,20 @@ func _physics_process(_delta: float) -> void:
 		for node: Node in get_tree().get_nodes_in_group("interactables"):
 			if (node as Area2D).overlaps_body(self):
 				node.interact()
+
+
+## 이번 틱에 위에 선 Player가 점프할 수 있는가: 녹화에서 이번 틱 위치가 앞뒤 틱보다 낮지 않을 때(서 있거나 막 착지)만.
+## 점프 중·낙하 중·발판에 실려 가는 고스트를 발판 삼아 뛰면 고스트 점프 높이가 그대로 더해져
+## (실측: 올라탄 채 꼭대기에서 뛰면 352px) 고스트 1명이 탑 2단보다 높이 닿는다. 높이 퍼즐(2-2 탑 쌓기)이
+## 성립하도록 막는다. 녹화를 미리 다 알고 있어서 "다음 틱"도 볼 수 있다(결정론 유지).
+func supports_jump() -> bool:
+	if not alive or _frames.size() < 2 or _tick >= _frames.size():
+		return true
+	var i: int = maxi(_tick - 1, 0)
+	var y: float = (_frames[i]["pos"] as Vector2).y
+	var prev_y: float = (_frames[maxi(i - 1, 0)]["pos"] as Vector2).y
+	var next_y: float = (_frames[i + 1]["pos"] as Vector2).y
+	return y >= prev_y - GROUNDED_EPSILON and y >= next_y - GROUNDED_EPSILON
 
 
 ## 끼임 판정 등에서 쓰는 몸 모양(Player·고스트 공용 body_shape.tres).

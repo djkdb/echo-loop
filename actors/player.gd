@@ -131,7 +131,8 @@ func _interact_with_overlapping() -> void:
 ## 이번 틱에 점프했으면 true.
 func _update_jump() -> bool:
 	if is_on_floor():
-		_coyote_ticks_left = _coyote_ticks
+		# 움직이는 고스트 위에서는 점프·코요테 모두 허용하지 않는다(Ghost.supports_jump).
+		_coyote_ticks_left = _coyote_ticks if _floor_supports_jump() else 0
 	if Input.is_action_just_pressed("jump") and not _held_on_reset.has(&"jump"):
 		_jump_buffer_ticks_left = _jump_buffer_ticks
 
@@ -148,6 +149,21 @@ func _update_jump() -> bool:
 	if _jump_buffer_ticks_left > 0:
 		_jump_buffer_ticks_left -= 1
 	return jumped
+
+
+## 직전 move_and_slide에서 밟은 바닥 중 하나라도 점프 발판이 되면 true. 고스트만 밟고 있고 그 고스트가
+## 이번 틱에 위아래로 움직이는 중이면 false.
+func _floor_supports_jump() -> bool:
+	var ghost_only: bool = false
+	for i in get_slide_collision_count():
+		var c: KinematicCollision2D = get_slide_collision(i)
+		if c.get_normal().dot(up_direction) < 0.7:
+			continue
+		var ghost: Ghost = c.get_collider() as Ghost
+		if ghost == null or ghost.supports_jump():
+			return true
+		ghost_only = true
+	return not ghost_only
 
 
 func _unblock_released_actions() -> void:

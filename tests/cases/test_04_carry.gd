@@ -34,3 +34,32 @@ func run_case() -> void:
 		if t > 100: rise[1] = maxf(rise[1], rise[0] - player.global_position.y), 260)
 	await tick(1)
 	check("vertical carry: player lifted with the ghost's jump and back on its head", rise[1] > 150.0, "rise=%.1f" % rise[1])
+
+	# 움직이는 고스트 위에서는 점프 불가(슈퍼 점프·올라타기 부스트 방지), 고스트가 서 있으면 보통 점프
+	for case: Array in [[131, "while the ghost rises"], [153, "at the ghost's apex"], [165, "while the ghost falls"]]:
+		await restart()
+		await run_loop(func(t: int) -> void:
+			if t == 130: Input.action_press("jump")
+			if t == 132: Input.action_release("jump"), 300)
+		var hop: Array = [0.0, 1e9, false]
+		await run_loop(func(t: int) -> void:
+			if t == 5: Input.action_press("jump")
+			if t == 8: Input.action_release("jump")
+			if t == 100: hop[0] = player.global_position.y
+			if t == case[0]: Input.action_press("jump")
+			if t == case[0] + 3: Input.action_release("jump")
+			hop[1] = minf(hop[1], player.global_position.y), 260)
+		check("no jump off a moving ghost (%s): rise stays at the ghost's own hop" % case[1], hop[0] - hop[1] < 180.0, "rise=%.1f" % (hop[0] - hop[1]))
+	await restart()
+	await run_loop(func(t: int) -> void:
+		if t == 130: Input.action_press("jump")
+		if t == 132: Input.action_release("jump"), 300)
+	var still: Array = [0.0, 1e9]
+	await run_loop(func(t: int) -> void:
+		if t == 5: Input.action_press("jump")
+		if t == 8: Input.action_release("jump")
+		if t == 80: still[0] = player.global_position.y
+		if t == 85: Input.action_press("jump")
+		if t == 88: Input.action_release("jump")
+		if t < 125: still[1] = minf(still[1], player.global_position.y), 260)
+	check("standing ghost is a normal jump platform", still[0] - still[1] > 170.0, "rise=%.1f" % (still[0] - still[1]))
