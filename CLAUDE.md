@@ -81,20 +81,36 @@ sync_to_physics 바디(고스트·발판·상자)의 이동은 모든 `_physics_
 
 ```
 res://
-├─ game/        main.tscn, loop_manager.gd
-├─ actors/      player.tscn/.gd, ghost.tscn/.gd
+├─ game/        main.tscn/.gd, loop_manager.gd, replay.tscn/.gd(리플레이 씬)
+│               palette.gd(색), fx.gd·reels_mode.gd(Main 안 연출 노드), puff·glitch_sprite·flash_ring·clear_paths(연출 조각)
+├─ actors/      player.tscn/.gd, ghost.tscn/.gd, character_visual.gd(몸 그림), ghost_trail.gd(잔상), body_shape.tres
 ├─ objects/     pressure_plate, door, color_door, lever, timed_button, moving_platform, laser, box, exit
 │               (씬+스크립트 같은 폴더) + signal_sources.gd(공용)
-├─ levels/      level.gd, level_1_2.tscn, level_test*.tscn …
+├─ levels/      level.gd, level_1_2.tscn, level_test*.tscn …, room_style.gd·signal_wires.gd(레벨이 런타임에 붙이는 그림)
 ├─ ui/          hud.tscn/.gd, ghost_slots.gd, timeline.gd(hud.tscn 안 노드 스크립트)
-├─ autoload/    replay_io.gd
-├─ assets/      fonts/ (Noto Sans KR, OFL — 프로젝트 기본 폰트)
+├─ autoload/    replay_io.gd(ReplayIO), sfx.gd(Sfx)
+├─ assets/      fonts/ (Noto Sans KR = 기본, Space Grotesk 700 + 한글 폴백 = hud_font.tres, 모두 OFL)
+│               fx/ (glow_texture·additive = 가산 글로우, rewind·glitch 셰이더)
 └─ tests/       run_all.gd, test_base.gd, cases/test_*.gd (자동 테스트, 내보내기에서 제외)
 ```
 
 씬과 그 스크립트는 같은 폴더에 같은 이름으로 둔다.
 단, `levels/level.gd`는 모든 레벨 공용 스크립트(같은 이름 규칙의 예외)다. 루프 길이·고스트 상한도 여기 export로 레벨마다 정한다.
 스크립트 옆에 생기는 `.uid` 파일은 지우지 말고 같이 커밋한다.
+
+## 비주얼 "NEON LOOP" (연출 규칙)
+
+- 색은 `game/palette.gd`(`Palette`)에서만 정한다. 바탕 #0A0C14, 방 #10131F(24px 격자 흰색 3%), 벽 선 #3B4773,
+  나 #F4F5FA, 고스트 #4FA3FF/#FF9A3D/#4ADE80/#B47CFF(채움 28% + 2px 외곽선 + 번호 배지), 신호 #FFD23F,
+  문 #FF4D6D, 출구 #5EF2C2, 보조 글자 #8B93AD.
+- **연출은 `_process`에서만.** 로직은 시그널(`jumped`, `landed`, `toggled`, `collapsed`, `loop_ended`…)이나 상태만 남기고,
+  그림·애니메이션·소리는 `_process`(또는 연출 노드)가 그 상태를 읽어 만든다. 연출의 난수는 게임플레이에 영향이 없어야 한다.
+- 글로우·셰이더는 Compatibility 렌더러용: 방사형 그라데이션 + ADD 블렌드 스프라이트, `canvas_item` 셰이더.
+- 씬의 Polygon2D 그림은 에디터 미리보기용으로 남기고, 실행 중엔 스크립트 `_draw`가 그린다(문·발판·상자·방).
+- 릴스 모드(F9, `ReelsMode`): HUD 숨김, 방 내부를 화면 x 24~612·y 300~1030에 맞춤, 상단 y 120~280 텍스트 한 줄.
+- 리플레이: CLEAR 때 `user://replays/<stage>.json` 저장, `game/replay.tscn`으로 재생. Movie Maker 렌더:
+  `godot --path . --write-movie out.avi --fixed-fps 60 res://game/replay.tscn -- --stage=level_1_2 --loops=1 --reels`
+- 효과음: `Sfx.play(name)`(SFX 버스, 코드 합성). 새 소리는 `autoload/sfx.gd`의 streams에 추가.
 
 ## 레벨 배치
 
@@ -151,8 +167,11 @@ R과 Shift+R이 겹치므로 `end_loop`는 반드시 exact match로 검사한다
 남은 MVP (기획서 기준, 한 번에 한 단계씩)
 - [ ] 스테이지 12~15개(3챕터, 세로 9:16), 스테이지 선택 화면
 - [ ] 별점(★1 클리어, ★2 상한보다 적은 고스트, ★3 개발자 기록) + 브라우저 저장
-- [ ] 연출: 루프 리셋 되감기, 패러독스 글리치, 마지막 3초 똑딱 소리, 클리어 리플레이(2배속 겹치기)
-- [ ] 리플레이 저장(autoload/replay_io.gd), 릴스 모드(F9)
+- [x] 비주얼 "NEON LOOP": 팔레트·방·글꼴·캐릭터·찌그러짐·먼지·잔상·신호선·문 슬라이드
+- [x] 연출: 루프 리셋 되감기+흔들림, 패러독스 글리치, 마지막 3초 똑딱, CLEAR 플래시+루프 경로 점선
+- [x] 리플레이 저장·재생(Movie Maker 렌더), 릴스 모드(F9), 효과음(SFX 버스)
+- [ ] 캐릭터 약 2배 크기(카메라·타일 스케일) — BACKLOG 참고
+- [ ] 클리어 리플레이 2배속
 - [ ] 모바일 터치 조작, 웹 빌드(itch.io), 폰트 서브셋
 
 미뤄 둔 결정·알려진 한계는 docs/BACKLOG.md.
