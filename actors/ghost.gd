@@ -9,8 +9,8 @@ extends AnimatableBody2D
 ## 녹화 경로가 지형에 막혀 이번 루프에서 붕괴했을 때.
 signal collapsed
 
-## 기획서 고정색: 1 파랑, 2 주황, 3 초록, 4 보라(릴스 시리즈 내내 바꾸지 않는다).
-const COLORS: Array[Color] = [Color(0.3, 0.6, 1.0, 1), Color(1.0, 0.6, 0.2, 1), Color(0.35, 0.85, 0.4, 1), Color(0.7, 0.45, 1.0, 1)]
+## 기획서 고정색: 1 파랑, 2 주황, 3 초록, 4 보라(Palette.GHOSTS, 릴스 시리즈 내내 바꾸지 않는다).
+const COLORS: Array[Color] = Palette.GHOSTS
 
 ## 녹화 위치까지 이만큼(px) 이상 못 가야 "막힘"으로 본다. 녹화 위치는 표면의 safe margin(0.08px) 안쪽에
 ## 걸칠 수 있어서(예: 내려온 발판에 바닥 쪽으로 눌린 Player), 0 기준이면 환경이 같아도 붕괴가 난다.

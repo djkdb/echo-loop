@@ -14,5 +14,5 @@ script = ExtResource("1_platform")
 shape = SubResource("RectangleShape2D_platform")
 
 [node name="Visual" type="Polygon2D" parent="."]
-color = Color(0.55, 0.6, 0.75, 1)
+color = Color(0.2314, 0.2784, 0.451, 1)
 polygon = PackedVector2Array(-60, -10, 60, -10, 60, 10, -60, 10)

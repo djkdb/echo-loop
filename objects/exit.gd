@@ -32,6 +32,20 @@ func _physics_process(_delta: float) -> void:
 	_player_inside = inside
 
 
+## 아치형 출구(정적인 그림).
+func _draw() -> void:
+	var w: float = 60.0
+	var h: float = 100.0
+	var r: float = w * 0.5
+	var pts: PackedVector2Array = [Vector2(-r, 0), Vector2(-r, -(h - r))]
+	for i in range(0, 17):
+		var a: float = PI + PI * float(i) / 16.0
+		pts.append(Vector2(0, -(h - r)) + Vector2(cos(a), sin(a)) * r)
+	pts.append(Vector2(r, 0))
+	draw_colored_polygon(pts, Color(Palette.EXIT, 0.14))
+	draw_polyline(pts, Palette.EXIT, 3.0, true)
+
+
 func reset() -> void:
 	_player_inside = false
 	_reset_frame = Engine.get_physics_frames()

@@ -18,13 +18,13 @@ func rows() -> Array[Dictionary]:
 		return out
 	for ghost: Ghost in loop_manager.ghosts():
 		var row: Dictionary = _events(ghost.frames())
-		row["color"] = Ghost.COLORS[(ghost.number - 1) % Ghost.COLORS.size()]
+		row["color"] = Palette.ghost(ghost.number)
 		row["collapsed_at"] = ghost.collapsed_at_tick
 		row["benched"] = ghost.benched
 		out.append(row)
 	if player != null:
 		var me: Dictionary = _events(player.recording)
-		me["color"] = Color(0.95, 0.95, 0.95, 1)
+		me["color"] = Palette.ME
 		me["collapsed_at"] = -1
 		me["benched"] = false
 		out.append(me)
@@ -45,7 +45,8 @@ func _events(frames: Array[Dictionary]) -> Dictionary:
 func _draw() -> void:
 	if loop_manager == null or loop_manager.loop_ticks <= 0:
 		return
-	draw_rect(Rect2(Vector2.ZERO, size), Color(0, 0, 0, 0.45))
+	draw_rect(Rect2(Vector2.ZERO, size), Color(Palette.BG, 0.7))
+	draw_rect(Rect2(Vector2.ZERO, size), Palette.WALL_LINE, false, 1.0)
 	var data: Array[Dictionary] = rows()
 	var row_h: float = size.y / maxf(float(data.size()), 1.0)
 	for r in data.size():
@@ -62,10 +63,10 @@ func _draw() -> void:
 			draw_colored_polygon(PackedVector2Array([p + Vector2(0, -6), p + Vector2(6, 0), p + Vector2(0, 6), p + Vector2(-6, 0)]), color)
 		if row["collapsed_at"] >= 0:
 			var c: Vector2 = Vector2(_x(row["collapsed_at"]), y)
-			draw_line(c + Vector2(-5, -5), c + Vector2(5, 5), Color.RED, 3.0)
-			draw_line(c + Vector2(-5, 5), c + Vector2(5, -5), Color.RED, 3.0)
+			draw_line(c + Vector2(-5, -5), c + Vector2(5, 5), Palette.DOOR, 3.0)
+			draw_line(c + Vector2(-5, 5), c + Vector2(5, -5), Palette.DOOR, 3.0)
 	var cx: float = _x(loop_manager.tick)
-	draw_line(Vector2(cx, 0), Vector2(cx, size.y), Color(1, 1, 1, 0.8), 2.0)
+	draw_line(Vector2(cx, 0), Vector2(cx, size.y), Color(Palette.ME, 0.8), 2.0)
 
 
 func _x(t: int) -> float:

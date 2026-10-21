@@ -15,7 +15,7 @@ shape = ExtResource("2_shape")
 [node name="Visual" type="Node2D" parent="."]
 
 [node name="Body" type="Polygon2D" parent="Visual"]
-color = Color(0.95, 0.95, 0.95, 1)
+color = Color(0.9569, 0.9608, 0.9804, 1)
 polygon = PackedVector2Array(-20, -32, 20, -32, 20, 32, -20, 32)
 
 [node name="Eye" type="Polygon2D" parent="Visual"]

@@ -19,8 +19,8 @@ shape = SubResource("RectangleShape2D_beam")
 [node name="BeamLine" type="Line2D" parent="."]
 points = PackedVector2Array(0, 0, 10, 0)
 width = 6.0
-default_color = Color(1, 0.25, 0.3, 0.9)
+default_color = Color(1, 0.302, 0.4275, 1)
 
 [node name="Emitter" type="Polygon2D" parent="."]
-color = Color(0.55, 0.2, 0.25, 1)
+color = Color(1, 0.302, 0.4275, 1)
 polygon = PackedVector2Array(-12, -12, 4, -12, 4, 12, -12, 12)

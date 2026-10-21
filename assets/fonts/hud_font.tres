@@ -1,0 +1,11 @@
+[gd_resource type="FontVariation" format=3 uid="uid://dwe5hg5nffvvd"]
+
+[ext_resource type="FontFile" uid="uid://cltcm6qhlfek3" path="res://assets/fonts/SpaceGrotesk-Variable.ttf" id="1_sg"]
+[ext_resource type="FontFile" uid="uid://ddexe0gwhqesb" path="res://assets/fonts/NotoSansKR-Bold.otf" id="2_noto"]
+
+[resource]
+fallbacks = Array[Font]([ExtResource("2_noto")])
+base_font = ExtResource("1_sg")
+variation_opentype = {
+2003265652: 700
+}

@@ -50,5 +50,5 @@ func _set_on(on: bool) -> void:
 	if is_on == on:
 		return
 	is_on = on
-	_visual.color = Color(0.4, 0.95, 1.0, 1) if on else Color(0.2, 0.45, 0.55, 1)
+	_visual.color = Palette.SIGNAL if on else Palette.SUB_TEXT
 	toggled.emit(on)

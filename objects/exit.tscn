@@ -1,5 +1,7 @@
 [gd_scene format=3 uid="uid://curqtt3tkxrfw"]
 
+[ext_resource type="Material" uid="uid://cs32bp30a6en1" path="res://assets/fx/additive.tres" id="3_add"]
+[ext_resource type="Texture2D" uid="uid://dgdgoi3tghiwj" path="res://assets/fx/glow_texture.tres" id="4_glow"]
 [ext_resource type="Script" uid="uid://dd0rlixr14esn" path="res://objects/exit.gd" id="1_exit"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_exit"]
@@ -15,11 +17,9 @@ script = ExtResource("1_exit")
 position = Vector2(0, -50)
 shape = SubResource("RectangleShape2D_exit")
 
-[node name="Visual" type="Polygon2D" parent="."]
-color = Color(0.35, 0.9, 0.5, 0.35)
-polygon = PackedVector2Array(-30, -100, 30, -100, 30, 0, -30, 0)
-
-[node name="Frame" type="Line2D" parent="."]
-points = PackedVector2Array(-30, 0, -30, -100, 30, -100, 30, 0)
-width = 4.0
-default_color = Color(0.35, 0.9, 0.5, 1)
+[node name="Glow" type="Sprite2D" parent="."]
+modulate = Color(0.3686, 0.949, 0.7608, 0.35)
+material = ExtResource("3_add")
+position = Vector2(0, -50)
+scale = Vector2(1.4, 1.6)
+texture = ExtResource("4_glow")

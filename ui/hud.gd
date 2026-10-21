@@ -6,8 +6,8 @@ extends CanvasLayer
 @export var loop_manager: LoopManager
 @export var player: Player
 @export var warning_seconds: float = 3.0
-@export var bar_color: Color = Color(0.9, 0.9, 0.95, 1)
-@export var warning_color: Color = Color(1, 0.35, 0.3, 1)
+@export var bar_color: Color = Palette.ME
+@export var warning_color: Color = Palette.DOOR
 
 var _warning_ticks: int = 0
 

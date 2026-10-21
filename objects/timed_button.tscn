@@ -16,11 +16,11 @@ position = Vector2(0, -32)
 shape = SubResource("RectangleShape2D_button")
 
 [node name="Post" type="Polygon2D" parent="."]
-color = Color(0.35, 0.35, 0.4, 1)
+color = Color(0.2314, 0.2784, 0.451, 1)
 polygon = PackedVector2Array(-6, -40, 6, -40, 6, 0, -6, 0)
 
 [node name="Visual" type="Polygon2D" parent="."]
-color = Color(0.2, 0.45, 0.55, 1)
+color = Color(0.5451, 0.5765, 0.6784, 1)
 polygon = PackedVector2Array(-14, -56, 14, -56, 14, -40, -14, -40)
 
 [node name="TimerBar" type="Node2D" parent="."]
@@ -28,5 +28,5 @@ position = Vector2(-20, -66)
 scale = Vector2(0, 1)
 
 [node name="Fill" type="Polygon2D" parent="TimerBar"]
-color = Color(0.4, 0.95, 1, 1)
+color = Color(1, 0.8235, 0.2471, 1)
 polygon = PackedVector2Array(0, 0, 40, 0, 40, 4, 0, 4)

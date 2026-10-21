@@ -20,10 +20,10 @@ func _draw() -> void:
 	var slots: int = maxi(loop_manager.max_ghosts, ghosts.size())
 	for i in slots:
 		var center: Vector2 = Vector2(RADIUS + i * GAP, RADIUS)
-		var color: Color = Ghost.COLORS[i % Ghost.COLORS.size()]
+		var color: Color = Palette.ghost(i + 1)
 		if i < ghosts.size():
 			draw_circle(center, RADIUS, color)
 		else:
-			draw_arc(center, RADIUS - 1.5, 0.0, TAU, 32, color.darkened(0.3), 3.0)
+			draw_arc(center, RADIUS - 1.5, 0.0, TAU, 32, Color(color, 0.45), 3.0)
 		if loop_manager.overwrite_target == i + 1 and int(Time.get_ticks_msec() / 300) % 2 == 0:
-			draw_arc(center, RADIUS + 4.0, 0.0, TAU, 32, Color.WHITE, 3.0)
+			draw_arc(center, RADIUS + 4.0, 0.0, TAU, 32, Palette.ME, 3.0)
