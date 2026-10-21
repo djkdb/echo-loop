@@ -90,12 +90,16 @@ res://
 ├─ actors/      player.tscn/.gd, ghost.tscn/.gd, character_visual.gd(몸 그림), ghost_trail.gd(잔상), body_shape.tres
 ├─ objects/     pressure_plate, door, color_door, lever, timed_button, moving_platform, laser, box, exit
 │               (씬+스크립트 같은 폴더) + signal_sources.gd(공용)
-├─ levels/      level.gd, level_<챕터>_<번호>.tscn, level_test*.tscn, room_style.gd·signal_wires.gd(레벨이 런타임에 붙이는 그림)
-├─ ui/          hud.tscn/.gd, ghost_slots.gd, timeline.gd(hud.tscn 안 노드 스크립트)
-├─ autoload/    replay_io.gd(ReplayIO), sfx.gd(Sfx)
-├─ assets/      fonts/ (Noto Sans KR = 기본, Space Grotesk 700 + 한글 폴백 = hud_font.tres, 모두 OFL)
+├─ levels/      level.gd, level_<챕터>_<번호>.tscn(15개), level_test*.tscn, stages.gd(스테이지 목록·별점 규칙),
+│               room_style.gd·signal_wires.gd(레벨이 런타임에 붙이는 그림)
+├─ ui/          title.tscn/.gd(타이틀), stage_select.tscn/.gd(+ stage_card.gd), hud.tscn/.gd,
+│               ghost_slots.gd·timeline.gd·star_icons.gd·touch_controls.gd(HUD·화면 안 조각)
+├─ autoload/    replay_io.gd(ReplayIO), sfx.gd(Sfx), progress.gd(Progress: 클리어 기록 user://progress.json)
+├─ assets/      fonts/ (Noto Sans KR 서브셋 = 기본, Space Grotesk 700 + 한글 폴백 = hud_font.tres, 모두 OFL)
 │               fx/ (glow_texture·additive = 가산 글로우, rewind·glitch 셰이더)
 ├─ solutions/   <stage>.json (개발자 정답 리플레이 = 별 3개 기준, 내보내기에서 제외)
+├─ tools/       subset_font.py (한글 폰트 서브셋, 내보내기에서 제외)
+├─ docs/        design.pdf(기획서), levels.md(레벨 설계 근거), BACKLOG.md
 └─ tests/       run_all.gd, test_base.gd, cases/test_*.gd (자동 테스트), solution_case.gd(정답 검증 공용),
                 bots/<stage>.gd (정답을 실제로 풀어 solutions/를 만드는 봇) — 모두 내보내기에서 제외
 ```
@@ -116,7 +120,22 @@ res://
 - 릴스 모드(F9, `ReelsMode`): HUD 숨김, 방 내부를 화면 x 24~612·y 300~1030에 꽉 차게(줌 상한 없음), 릴스 텍스트 자리 y 240~300에 한 줄.
 - 리플레이: CLEAR 때 `user://replays/<stage>.json` 저장, `game/replay.tscn`으로 재생. Movie Maker 렌더:
   `godot --path . --write-movie out.avi --fixed-fps 60 res://game/replay.tscn -- --stage=level_1_2 --loops=1 --reels`
+  (`--solution`을 붙이면 user:// 대신 개발자 정답 `solutions/<stage>.json`을 재생 = 릴스 "정답편")
 - 효과음: `Sfx.play(name)`(SFX 버스, 코드 합성). 새 소리는 `autoload/sfx.gd`의 streams에 추가.
+
+## 화면 흐름·저장·모바일·웹 빌드
+
+- 흐름: `ui/title.tscn`(시작 씬, Enter·Space·E·탭) → `ui/stage_select.tscn`(방향키 + Enter/E, 클릭·탭, Esc 타이틀)
+  → `game/main.tscn`(`Progress.pending_stage`로 스테이지를 연다. Esc 선택 화면, CLEAR 뒤 E 다음 스테이지).
+  main.tscn을 직접 열면(테스트·에디터) 자기 `level_scene`을 쓰고 메뉴 이동은 하지 않는다.
+- 기록: `Progress`가 스테이지마다 CLEAR한 최소 고스트 수만 `user://progress.json`에 저장한다(웹에서는 브라우저 저장소).
+  별점 = ★1 클리어 / ★2 상한보다 적은 고스트 / ★3 개발자 기록 이하(`Stages.stars_for`). 앞 스테이지를 깨면 다음이 열린다.
+  자동 테스트는 `user://test_progress.json`을 쓴다(실제 기록을 건드리지 않음).
+- 모바일 터치: `TouchControls`(HUD 안)가 터치 화면에서만 보인다. 데스크톱 확인은 실행 인자 `--touch`.
+  버튼은 입력 액션을 그대로 누르므로 게임 로직은 키보드와 같은 길이다. 시간 바 0.5초 길게 = `end_loop`.
+- 웹 빌드: `godot --headless --path . --export-release "Web" build/web/index.html`
+  (export_presets.cfg "Web": 스레드 끔, 제외 `tests/* solutions/* tools/* docs/* build/*`. 4.7.2 web_nothreads 템플릿 필요.
+  `build/`는 git에 넣지 않는다. itch.io에는 build/web 폴더를 zip으로 올리고 "This file will be played in the browser").
 
 ## 레벨 배치 (화면 좌표 기준, 뷰포트 720×1280)
 
@@ -136,6 +155,7 @@ res://
 - **판과 그 판이 여는 문 사이는 70px 이상** 띄운다. 판에서 내려선 몸이 바로 문간에 들어서면 끼임 방지로 문이 안 닫혀
   혼자서도 지나간다(1-5 초안에서 실제로 났던 구멍).
 - 높이 퍼즐이 아닌 방은 칸막이를 천장까지 올려 점프로 넘는 길을 막는다.
+- 스테이지를 추가·수정하면 `levels/stages.gd` 목록(코드·제목·새 요소·상한·개발자 기록)을 같이 맞춘다(test_80이 어긋남을 잡는다).
 - 레벨마다 `solutions/<stage>.json`(정답 리플레이)과 `tests/bots/<stage>.gd`(그 정답을 실제로 푸는 봇)가 있다.
   레벨을 고치면 `godot --headless --fixed-fps 60 --path . -s tests/run_all.gd -- --dir=bots --only=<stage>`로 다시 만든다.
   `tests/cases/test_70_solutions_*.gd`가 정답 재현·CLEAR·고스트 하나라도 빼면 실패를 검증한다. 설계 근거는 `docs/levels.md`.
@@ -179,22 +199,21 @@ R과 Shift+R이 겹치므로 `end_loop`는 반드시 exact match로 검사한다
 
 ---
 
-## 현재 마일스톤: 전체 MVP (기획서 docs/design.pdf)
+## 현재 마일스톤: MVP 완성(phase-c, v0.1.0) → 플레이 테스트·릴스
 
 완료
 - [x] 1주차 프로토타입: Player·LoopManager·Ghost·압력판+문·1-2 "문지기"·HUD
 - [x] 오브젝트: 레버, 시한 버튼, 이동 발판, 레이저, 색 문, 상자, 반전 문(inverted)
 - [x] 고스트 편의: 되돌리기(Backspace), 개별 재녹화(1~4), 고스트 슬롯, 루프 타임라인
-- [x] 테스트 방: 패러독스(레버), 오브젝트 시연
+- [x] 비주얼 "NEON LOOP", 연출(되감기·글리치·똑딱·CLEAR 경로), 리플레이·릴스 모드, 효과음
+- [x] 스케일: 레벨 기하를 작게 + 카메라 줌(챕터 1 = 2.0, 이후 1.5), 화면 좌표 기준 레벨 배치 규칙
+- [x] 스테이지 15개(3챕터) + 개발자 정답 리플레이(solutions/)와 검증 테스트, 설계 근거 docs/levels.md
+- [x] 스테이지 선택 화면, 별점, 클리어 기록 저장, 타이틀 화면
+- [x] 모바일 터치 조작, 웹 빌드(build/web), 폰트 서브셋
 
-남은 MVP (기획서 기준, 한 번에 한 단계씩)
-- [ ] 스테이지 12~15개(3챕터, 세로 9:16), 스테이지 선택 화면
-- [ ] 별점(★1 클리어, ★2 상한보다 적은 고스트, ★3 개발자 기록) + 브라우저 저장
-- [x] 비주얼 "NEON LOOP": 팔레트·방·글꼴·캐릭터·찌그러짐·먼지·잔상·신호선·문 슬라이드
-- [x] 연출: 루프 리셋 되감기+흔들림, 패러독스 글리치, 마지막 3초 똑딱, CLEAR 플래시+루프 경로 점선
-- [x] 리플레이 저장·재생(Movie Maker 렌더), 릴스 모드(F9), 효과음(SFX 버스)
-- [ ] 캐릭터 약 2배 크기(카메라·타일 스케일) — BACKLOG 참고
-- [ ] 클리어 리플레이 2배속
-- [ ] 모바일 터치 조작, 웹 빌드(itch.io), 폰트 서브셋
+다음 후보(정해지면 한 단계씩)
+- [ ] 친구 플레이 테스트(5분 안에 풀면 적정, 10분 넘게 막히면 힌트 문구·배치 수정) → docs/levels.md 갱신
+- [ ] itch.io 업로드(사람이 한다), 릴스 촬영(리플레이 `--solution`으로 정답편)
+- [ ] 클리어 리플레이 2배속, 첫 스테이지 안내 문구, 모바일 되돌리기·처음부터 버튼 — docs/BACKLOG.md
 
 미뤄 둔 결정·알려진 한계는 docs/BACKLOG.md.
