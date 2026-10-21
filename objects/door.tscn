@@ -15,7 +15,7 @@ shape = SubResource("RectangleShape2D_door")
 
 [node name="Sensor" type="Area2D" parent="."]
 collision_layer = 8
-collision_mask = 6
+collision_mask = 7
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Sensor"]
 shape = SubResource("RectangleShape2D_door")

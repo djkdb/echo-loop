@@ -41,9 +41,8 @@ func reset() -> void:
 
 func _is_occupied() -> bool:
 	for body: Node2D in _sensor.get_overlapping_bodies():
-		if body is Ghost and not (body as Ghost).alive:
-			continue
-		return true
+		if PressurePlate.is_weight(body):
+			return true
 	return false
 
 

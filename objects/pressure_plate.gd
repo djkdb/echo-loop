@@ -35,11 +35,17 @@ func reset() -> void:
 func _pressing_body_count() -> int:
 	var count: int = 0
 	for body: Node2D in get_overlapping_bodies():
-		# 붕괴한 고스트는 사라진 것이므로 누르지 않는다.
-		if body is Ghost and not (body as Ghost).alive:
-			continue
-		count += 1
+		if is_weight(body):
+			count += 1
 	return count
+
+
+## 판을 누르는(문 끼임에도 쓰는) 몸: Player, 살아 있는 고스트, 상자. mask에 world가 있어(상자 감지)
+## 판에 닿은 바닥·벽도 겹침 목록에 들어오므로 종류로 거른다. 붕괴한 고스트는 사라진 것이라 세지 않는다.
+static func is_weight(body: Node2D) -> bool:
+	if body is Ghost:
+		return (body as Ghost).alive
+	return body is Player or body is Box
 
 
 func _set_on(on: bool) -> void:
