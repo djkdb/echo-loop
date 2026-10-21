@@ -50,14 +50,19 @@ func _physics_process(delta: float) -> void:
 	if not is_on_floor():
 		velocity.y = minf(velocity.y + gravity * delta, max_fall_speed)
 
-	_update_jump()
+	var jumped: bool = _update_jump()
 	move_and_slide()
 
 	# 상호작용은 "누른 순간"만 남긴다. 누르고 있는 동안 계속 true면 고스트가 레버를 매 틱 다시 당기게 된다.
+	var interacted: bool = Input.is_action_just_pressed("interact")
+	if interacted:
+		_interact_with_overlapping()
+	# jump는 재생에 쓰지 않고 루프 타임라인 표시용이다.
 	recording.append({
 		"pos": global_position,
 		"flip": _flip,
-		"interact": Input.is_action_just_pressed("interact"),
+		"interact": interacted,
+		"jump": jumped,
 	})
 
 
@@ -81,22 +86,33 @@ func reset() -> void:
 	_refresh_contact_state()
 
 
-func _update_jump() -> void:
+## 겹쳐 있는 레버·시한 버튼을 당긴다. 고스트도 녹화된 interact 틱에 같은 방식으로 부른다.
+func _interact_with_overlapping() -> void:
+	for node: Node in get_tree().get_nodes_in_group("interactables"):
+		if (node as Area2D).overlaps_body(self):
+			node.interact()
+
+
+## 이번 틱에 점프했으면 true.
+func _update_jump() -> bool:
 	if is_on_floor():
 		_coyote_ticks_left = _coyote_ticks
 	if Input.is_action_just_pressed("jump") and not _held_on_reset.has(&"jump"):
 		_jump_buffer_ticks_left = _jump_buffer_ticks
 
+	var jumped: bool = false
 	if _coyote_ticks_left > 0 and _jump_buffer_ticks_left > 0:
 		velocity.y = -jump_velocity
 		_coyote_ticks_left = 0
 		_jump_buffer_ticks_left = 0
+		jumped = true
 
 	# 판정한 뒤에 깎아야 바닥을 떠난 뒤·버튼을 누른 뒤 정확히 N틱 동안 점프가 허용된다.
 	if not is_on_floor() and _coyote_ticks_left > 0:
 		_coyote_ticks_left -= 1
 	if _jump_buffer_ticks_left > 0:
 		_jump_buffer_ticks_left -= 1
+	return jumped
 
 
 func _unblock_released_actions() -> void:

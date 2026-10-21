@@ -1,11 +1,14 @@
 class_name Door
 extends StaticBody2D
 ## 연결된 소스 중 하나라도 on이면 열리는 문(규칙 7). world 레이어라 닫혀 있으면 고스트 경로를 막는다.
+## inverted면 반대로 평소에 열려 있다가 신호가 오면 닫힌다. 레버(지금의 내가 문을 닫음)와 함께
+## 쓰면 "녹화 때 열려 있던 문이 재생 때 닫혀 있는" 패러독스가 생긴다.
 ##
-## 실행 순서: process_physics_priority = 20. 소스(압력판, 10)가 이번 틱 판정을 끝낸 뒤 열고 닫는다.
+## 실행 순서: process_physics_priority = 20. 소스(압력판·레버·시한 버튼, 10)가 이번 틱 판정을 끝낸 뒤 열고 닫는다.
 
 ## is_on 프로퍼티를 가진 노드(압력판·레버·시한 버튼)들.
 @export var sources: Array[NodePath] = []
+@export var inverted: bool = false
 
 var is_open: bool = false
 
@@ -18,16 +21,13 @@ var _sources: Array[Node] = []
 
 func _ready() -> void:
 	add_to_group("resettable")
-	for path: NodePath in sources:
-		var source: Node = get_node_or_null(path)
-		if source == null or not "is_on" in source:
-			push_warning("Door %s: 소스 %s를 찾을 수 없거나 is_on이 없다." % [name, path])
-			continue
-		_sources.append(source)
+	_sources = SignalSources.resolve(self, sources)
+	_set_open(inverted)
 
 
 func _physics_process(_delta: float) -> void:
-	if _any_source_on():
+	var want_open: bool = SignalSources.any_on(_sources) != inverted
+	if want_open:
 		_set_open(true)
 	elif is_open and not _is_occupied():
 		# 끼임 방지: 문 영역에 누가 있으면 닫지 않고, 비는 틱에 닫는다.
@@ -35,14 +35,8 @@ func _physics_process(_delta: float) -> void:
 
 
 func reset() -> void:
-	_set_open(false)
-
-
-func _any_source_on() -> bool:
-	for source: Node in _sources:
-		if source.is_on:
-			return true
-	return false
+	# 리셋 직후엔 모든 소스가 off이므로 inverted 문은 열린 상태로 시작한다.
+	_set_open(inverted)
 
 
 func _is_occupied() -> bool:

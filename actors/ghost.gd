@@ -9,7 +9,8 @@ extends AnimatableBody2D
 ## 녹화 경로가 지형에 막혀 이번 루프에서 붕괴했을 때.
 signal collapsed
 
-const COLORS: Array[Color] = [Color(0.3, 0.6, 1.0, 1), Color(1.0, 0.6, 0.2, 1)]
+## 기획서 고정색: 1 파랑, 2 주황, 3 초록, 4 보라(릴스 시리즈 내내 바꾸지 않는다).
+const COLORS: Array[Color] = [Color(0.3, 0.6, 1.0, 1), Color(1.0, 0.6, 0.2, 1), Color(0.35, 0.85, 0.4, 1), Color(0.7, 0.45, 1.0, 1)]
 
 var number: int = 1
 var alive: bool = true
@@ -52,6 +53,7 @@ func _physics_process(_delta: float) -> void:
 	if not alive or _frames.is_empty():
 		return
 	# 녹화보다 루프가 길면(R로 일찍 끝낸 녹화) 마지막 위치에 실체를 유지한 채 멈춘다.
+	var playing: bool = _tick < _frames.size()
 	var frame: Dictionary = _frames[mini(_tick, _frames.size() - 1)]
 	_tick += 1
 	var target: Vector2 = frame["pos"]
@@ -59,11 +61,16 @@ func _physics_process(_delta: float) -> void:
 	var motion: Vector2 = target - global_position
 	# 녹화 당시엔 지나간 길이 지금 지형(mask = world)에 막혔는지 이동 전에 검사한다.
 	if motion != Vector2.ZERO and test_move(global_transform, motion):
-		_collapse()
+		collapse()
 		return
 	global_position = target
 	replay_position = target
 	_visual.scale.x = -1.0 if frame["flip"] else 1.0
+	# 멈춰 선 뒤에는 마지막 프레임의 interact를 매 틱 반복하지 않는다.
+	if playing and frame["interact"]:
+		for node: Node in get_tree().get_nodes_in_group("interactables"):
+			if (node as Area2D).overlaps_body(self):
+				node.interact()
 
 
 func reset() -> void:
@@ -78,7 +85,10 @@ func reset() -> void:
 	_visual.scale.x = -1.0 if _frames[0]["flip"] else 1.0
 
 
-func _collapse() -> void:
+## 패러독스 붕괴. 경로가 막혔을 때 스스로, 레이저에 닿았을 때 레이저가 부른다.
+func collapse() -> void:
+	if not alive:
+		return
 	alive = false
 	hide()
 	# 숨기기만 하면 보이지 않는 발판이 남는다. 같은 틱에 Player가 밟지 못하도록 충돌도 즉시 끈다.
