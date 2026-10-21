@@ -29,11 +29,13 @@ var replay_position: Vector2 = Vector2.ZERO
 var _frames: Array[Dictionary] = []
 ## 이번 루프에서 처리한 틱 수. T번째 틱(1부터)에 frames[T - 1]로 간다.
 var _tick: int = 0
+var _last_fx_tick: int = -1
 
 @onready var _shape: CollisionShape2D = $CollisionShape2D
 @onready var _visual: Node2D = $Visual
-@onready var _body: Polygon2D = $Visual/Body
-@onready var _number_label: Label = $NumberLabel
+@onready var _body: CharacterVisual = $Visual/Body
+@onready var _badge: Polygon2D = $Badge
+@onready var _number_label: Label = $Badge/NumberLabel
 
 
 ## 트리에 넣기 전에 호출한다(덮어쓰기 때는 트리 안에서 다시 부르고 바로 reset된다).
@@ -54,8 +56,42 @@ func _ready() -> void:
 	add_to_group("resettable")
 	# Player가 루프 시작 때 겹친 고스트를 찾아 잠시 통과시키는 데 쓴다.
 	add_to_group("ghosts")
-	_body.color = COLORS[(number - 1) % COLORS.size()]
+	var color: Color = Palette.ghost(number)
+	_body.body_color = color
+	_body.eye_color = color
+	_badge.polygon = _badge_circle(11.0)
+	_badge.color = color
 	_number_label.text = str(number)
+	($Trail as Node).set("ghost", self)
+
+
+func _process(_delta: float) -> void:
+	# 녹화의 점프·착지 순간에 Player와 같은 찌그러짐(연출 전용)
+	if not alive or _tick < 2 or _tick > _frames.size():
+		return
+	var f: Dictionary = _frames[_tick - 1]
+	if _tick != _last_fx_tick:
+		_last_fx_tick = _tick
+		if f.get("jump", false):
+			_body.pulse(Vector2(0.85, 1.15), 0.12)
+		elif _tick >= 3:
+			var vy_prev: float = (_frames[_tick - 2]["pos"] as Vector2).y - (_frames[_tick - 3]["pos"] as Vector2).y
+			var vy_now: float = (f["pos"] as Vector2).y - (_frames[_tick - 2]["pos"] as Vector2).y
+			if vy_prev > 4.0 and absf(vy_now) < 0.5:
+				_body.pulse(Vector2(1.15, 0.85), 0.08)
+
+
+## 지금까지 처리한 틱 수(잔상·연출이 녹화의 어디를 재생 중인지 알 때 쓴다).
+func current_tick() -> int:
+	return _tick
+
+
+func _badge_circle(r: float) -> PackedVector2Array:
+	var pts := PackedVector2Array()
+	for i in 20:
+		var a: float = TAU * float(i) / 20.0
+		pts.append(Vector2(cos(a), sin(a)) * r)
+	return pts
 
 
 func _physics_process(_delta: float) -> void:

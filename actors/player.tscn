@@ -1,6 +1,9 @@
 [gd_scene format=3 uid="uid://br3ucd37ria6"]
 
 [ext_resource type="Script" uid="uid://dd63st8vvwjv1" path="res://actors/player.gd" id="1_player"]
+[ext_resource type="Script" uid="uid://bso8ml5fgqmd5" path="res://actors/character_visual.gd" id="3_body"]
+[ext_resource type="Material" uid="uid://cs32bp30a6en1" path="res://assets/fx/additive.tres" id="4_add"]
+[ext_resource type="Texture2D" uid="uid://dgdgoi3tghiwj" path="res://assets/fx/glow_texture.tres" id="5_glow"]
 [ext_resource type="Shape2D" uid="uid://7rdaefbhpdxi" path="res://actors/body_shape.tres" id="2_shape"]
 
 [node name="Player" type="CharacterBody2D"]
@@ -12,12 +15,13 @@ script = ExtResource("1_player")
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = ExtResource("2_shape")
 
+[node name="Glow" type="Sprite2D" parent="."]
+modulate = Color(0.9569, 0.9608, 0.9804, 0.22)
+material = ExtResource("4_add")
+scale = Vector2(1.3, 1.6)
+texture = ExtResource("5_glow")
+
 [node name="Visual" type="Node2D" parent="."]
 
-[node name="Body" type="Polygon2D" parent="Visual"]
-color = Color(0.9569, 0.9608, 0.9804, 1)
-polygon = PackedVector2Array(-20, -32, 20, -32, 20, 32, -20, 32)
-
-[node name="Eye" type="Polygon2D" parent="Visual"]
-color = Color(0.1, 0.1, 0.12, 1)
-polygon = PackedVector2Array(6, -22, 14, -22, 14, -14, 6, -14)
+[node name="Body" type="Node2D" parent="Visual"]
+script = ExtResource("3_body")

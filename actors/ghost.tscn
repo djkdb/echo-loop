@@ -1,12 +1,14 @@
 [gd_scene format=3 uid="uid://rm4fyujolkha"]
 
 [ext_resource type="Script" uid="uid://djiwoowsqks7u" path="res://actors/ghost.gd" id="1_ghost"]
+[ext_resource type="Script" uid="uid://bso8ml5fgqmd5" path="res://actors/character_visual.gd" id="3_body"]
+[ext_resource type="Script" uid="uid://r0cjurpbn464" path="res://actors/ghost_trail.gd" id="4_trail"]
+[ext_resource type="FontVariation" uid="uid://dwe5hg5nffvvd" path="res://assets/fonts/hud_font.tres" id="5_font"]
 [ext_resource type="Shape2D" uid="uid://7rdaefbhpdxi" path="res://actors/body_shape.tres" id="2_shape"]
 
 [node name="Ghost" type="AnimatableBody2D"]
 process_physics_priority = -20
 top_level = true
-modulate = Color(1, 1, 1, 0.55)
 collision_layer = 4
 collision_mask = 33
 script = ExtResource("1_ghost")
@@ -14,24 +16,28 @@ script = ExtResource("1_ghost")
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = ExtResource("2_shape")
 
+[node name="Trail" type="Node2D" parent="."]
+script = ExtResource("4_trail")
+
 [node name="Visual" type="Node2D" parent="."]
 
-[node name="Body" type="Polygon2D" parent="Visual"]
-color = Color(0.3, 0.6, 1, 1)
-polygon = PackedVector2Array(-20, -32, 20, -32, 20, 32, -20, 32)
+[node name="Body" type="Node2D" parent="Visual"]
+script = ExtResource("3_body")
+fill_alpha = 0.28
+outline_width = 2.0
 
-[node name="Eye" type="Polygon2D" parent="Visual"]
-color = Color(1, 1, 1, 1)
-polygon = PackedVector2Array(6, -22, 14, -22, 14, -14, 6, -14)
+[node name="Badge" type="Polygon2D" parent="."]
+position = Vector2(0, -48)
+polygon = PackedVector2Array(-11, -11, 11, -11, 11, 11, -11, 11)
 
-[node name="NumberLabel" type="Label" parent="."]
-offset_left = -30.0
-offset_top = -84.0
-offset_right = 30.0
-offset_bottom = -38.0
-theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 8
-theme_override_font_sizes/font_size = 32
+[node name="NumberLabel" type="Label" parent="Badge"]
+offset_left = -14.0
+offset_top = -14.0
+offset_right = 14.0
+offset_bottom = 13.0
+theme_override_colors/font_color = Color(0.03922, 0.04706, 0.07843, 1)
+theme_override_fonts/font = ExtResource("5_font")
+theme_override_font_sizes/font_size = 18
 text = "1"
 horizontal_alignment = 1
 vertical_alignment = 1

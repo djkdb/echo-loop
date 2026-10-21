@@ -2,6 +2,10 @@ class_name Player
 extends CharacterBody2D
 ## 지금의 나. 좌우 이동·점프를 하고, 매 물리 틱 위치를 녹화한다.
 
+## 이번 틱에 점프했을 때 / 공중에서 바닥에 닿았을 때(연출·소리가 듣는다).
+signal jumped
+signal landed
+
 @export var spawn_point: Marker2D
 @export var move_speed: float = 360.0
 @export var jump_velocity: float = 900.0
@@ -29,10 +33,18 @@ var _passthrough_ghosts: Array[Ghost] = []
 
 @onready var _visual: Node2D = $Visual
 @onready var _shape: CollisionShape2D = $CollisionShape2D
+@onready var _body: CharacterVisual = $Visual/Body
+
+var _was_on_floor: bool = false
+## 시그널은 물리 틱에 나오지만 그림·먼지는 _process에서 만든다.
+var _fx_jump: bool = false
+var _fx_land: bool = false
 
 
 func _ready() -> void:
 	add_to_group("resettable")
+	jumped.connect(func() -> void: _fx_jump = true)
+	landed.connect(func() -> void: _fx_land = true)
 	_coyote_ticks = int(coyote_seconds * Engine.physics_ticks_per_second)
 	_jump_buffer_ticks = int(jump_buffer_seconds * Engine.physics_ticks_per_second)
 	# 첫 reset()은 Main이 레벨을 붙이고 SpawnPoint를 넘겨준 뒤 restart_stage로 한다.
@@ -50,8 +62,13 @@ func _physics_process(delta: float) -> void:
 	if not is_on_floor():
 		velocity.y = minf(velocity.y + gravity * delta, max_fall_speed)
 
-	var jumped: bool = _update_jump()
+	var did_jump: bool = _update_jump()
 	move_and_slide()
+	if did_jump:
+		jumped.emit()
+	if is_on_floor() and not _was_on_floor:
+		landed.emit()
+	_was_on_floor = is_on_floor()
 
 	# 상호작용은 "누른 순간"만 남긴다. 누르고 있는 동안 계속 true면 고스트가 레버를 매 틱 다시 당기게 된다.
 	var interacted: bool = Input.is_action_just_pressed("interact")
@@ -62,8 +79,18 @@ func _physics_process(delta: float) -> void:
 		"pos": global_position,
 		"flip": _flip,
 		"interact": interacted,
-		"jump": jumped,
+		"jump": did_jump,
 	})
+
+
+func _process(_delta: float) -> void:
+	if _fx_jump:
+		_fx_jump = false
+		_body.pulse(Vector2(0.85, 1.15), 0.12)
+	if _fx_land:
+		_fx_land = false
+		_body.pulse(Vector2(1.15, 0.85), 0.08)
+		Puff.burst(get_parent(), global_position + Vector2(0, 32), Palette.ME, 3)
 
 
 ## 끼임 판정 등에서 쓰는 몸 모양(Player·고스트 공용 body_shape.tres).
@@ -89,6 +116,7 @@ func reset() -> void:
 	else:
 		global_position = spawn_point.global_position
 	_refresh_contact_state()
+	_was_on_floor = is_on_floor()
 
 
 ## 겹쳐 있는 레버·시한 버튼을 당긴다. 고스트도 녹화된 interact 틱에 같은 방식으로 부른다.
