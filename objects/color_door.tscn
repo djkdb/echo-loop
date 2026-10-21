@@ -1,0 +1,25 @@
+[gd_scene format=3 uid="uid://sk6uoiv1bd5i"]
+
+[ext_resource type="Script" uid="uid://ba4xogc5aivx1" path="res://objects/color_door.gd" id="1_color_door"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_color_door"]
+size = Vector2(40, 160)
+
+[node name="ColorDoor" type="StaticBody2D"]
+process_physics_priority = 20
+collision_mask = 0
+script = ExtResource("1_color_door")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_color_door")
+
+[node name="Sensor" type="Area2D" parent="."]
+collision_layer = 8
+collision_mask = 6
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Sensor"]
+shape = SubResource("RectangleShape2D_color_door")
+
+[node name="Visual" type="Polygon2D" parent="."]
+color = Color(0.78, 0.36, 0.3, 1)
+polygon = PackedVector2Array(-20, -80, 20, -80, 20, 80, -20, 80)

@@ -109,6 +109,8 @@ reels_mode={
 2d_physics/layer_2="player"
 2d_physics/layer_3="ghost"
 2d_physics/layer_4="sensor"
+2d_physics/layer_5="player_barrier"
+2d_physics/layer_6="ghost_barrier"
 
 [physics]
 

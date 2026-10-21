@@ -8,6 +8,7 @@ process_physics_priority = -20
 top_level = true
 modulate = Color(1, 1, 1, 0.55)
 collision_layer = 4
+collision_mask = 33
 script = ExtResource("1_ghost")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]

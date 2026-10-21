@@ -63,7 +63,7 @@ func _physics_process(_delta: float) -> void:
 	var target: Vector2 = frame["pos"]
 	# sync_to_physics에서 global_position은 직전 물리 스텝 결과(= 지금 실제로 있는 곳)다.
 	var motion: Vector2 = target - global_position
-	# 녹화 당시엔 지나간 길이 지금 지형(mask = world)에 막혔는지 이동 전에 검사한다.
+	# 녹화 당시엔 지나간 길이 지금 지형(mask = world + 주황 문)에 막혔는지 이동 전에 검사한다.
 	if motion != Vector2.ZERO:
 		var hit := KinematicCollision2D.new()
 		if test_move(global_transform, motion, hit) and hit.get_remainder().length() > BLOCK_TOLERANCE:

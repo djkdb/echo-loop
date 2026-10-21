@@ -89,7 +89,8 @@ func _blocked_by_world(body: PhysicsBody2D, shape: Shape2D, at: Vector2) -> bool
 	query.transform = Transform2D(0.0, at)
 	# 닿아 있기만 한 바닥·벽은 막힘이 아니다(녹화 위치는 표면에서 0.08px 안팎).
 	query.margin = -1.0
-	query.collision_mask = body.collision_mask & 1
+	# 그 몸을 막는 지형(world·색 문)만. 다른 몸(player·ghost 레이어)은 밀려날 수 있으니 제외.
+	query.collision_mask = body.collision_mask & ~(2 | 4)
 	query.exclude = [get_rid(), body.get_rid()]
 	return not get_world_2d().direct_space_state.intersect_shape(query, 1).is_empty()
 
