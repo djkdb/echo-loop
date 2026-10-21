@@ -51,6 +51,10 @@ func _ready() -> void:
 	_clear_panel.add_child(_clear_record)
 	_hint_label.offset_top = 175.0
 	_hint_label.offset_bottom = 225.0
+	# 모바일 터치 버튼(터치 화면에서만 보인다). HUD 안이라 릴스 모드에서 HUD와 함께 숨는다.
+	var touch := TouchControls.new()
+	touch.name = "TouchControls"
+	add_child(touch)
 
 
 func _process(_delta: float) -> void:
