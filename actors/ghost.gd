@@ -12,6 +12,10 @@ signal collapsed
 ## 기획서 고정색: 1 파랑, 2 주황, 3 초록, 4 보라(릴스 시리즈 내내 바꾸지 않는다).
 const COLORS: Array[Color] = [Color(0.3, 0.6, 1.0, 1), Color(1.0, 0.6, 0.2, 1), Color(0.35, 0.85, 0.4, 1), Color(0.7, 0.45, 1.0, 1)]
 
+## 녹화 위치까지 이만큼(px) 이상 못 가야 "막힘"으로 본다. 녹화 위치는 표면의 safe margin(0.08px) 안쪽에
+## 걸칠 수 있어서(예: 내려온 발판에 바닥 쪽으로 눌린 Player), 0 기준이면 환경이 같아도 붕괴가 난다.
+const BLOCK_TOLERANCE: float = 0.5
+
 var number: int = 1
 var alive: bool = true
 ## 이번 틱에 가기로 한 위치. sync_to_physics라 global_position은 물리 스텝 뒤에야 따라오므로,
@@ -60,9 +64,11 @@ func _physics_process(_delta: float) -> void:
 	# sync_to_physics에서 global_position은 직전 물리 스텝 결과(= 지금 실제로 있는 곳)다.
 	var motion: Vector2 = target - global_position
 	# 녹화 당시엔 지나간 길이 지금 지형(mask = world)에 막혔는지 이동 전에 검사한다.
-	if motion != Vector2.ZERO and test_move(global_transform, motion):
-		collapse()
-		return
+	if motion != Vector2.ZERO:
+		var hit := KinematicCollision2D.new()
+		if test_move(global_transform, motion, hit) and hit.get_remainder().length() > BLOCK_TOLERANCE:
+			collapse()
+			return
 	global_position = target
 	replay_position = target
 	_visual.scale.x = -1.0 if frame["flip"] else 1.0
@@ -71,6 +77,11 @@ func _physics_process(_delta: float) -> void:
 		for node: Node in get_tree().get_nodes_in_group("interactables"):
 			if (node as Area2D).overlaps_body(self):
 				node.interact()
+
+
+## 끼임 판정 등에서 쓰는 몸 모양(Player·고스트 공용 body_shape.tres).
+func body_shape() -> Shape2D:
+	return _shape.shape
 
 
 func reset() -> void:

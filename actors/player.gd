@@ -66,6 +66,11 @@ func _physics_process(delta: float) -> void:
 	})
 
 
+## 끼임 판정 등에서 쓰는 몸 모양(Player·고스트 공용 body_shape.tres).
+func body_shape() -> Shape2D:
+	return _shape.shape
+
+
 func reset() -> void:
 	recording.clear()
 	velocity = Vector2.ZERO
