@@ -1,0 +1,107 @@
+[gd_scene format=3 uid="uid://b734202sipiy3"]
+
+[ext_resource type="Script" uid="uid://d0t6pnrne08kt" path="res://levels/level.gd" id="1_level"]
+[ext_resource type="PackedScene" uid="uid://curqtt3tkxrfw" path="res://objects/exit.tscn" id="2_exit"]
+[ext_resource type="PackedScene" uid="uid://8rtice17j7mo" path="res://objects/pressure_plate.tscn" id="3_plate"]
+[ext_resource type="PackedScene" uid="uid://d3q08poj7t8pt" path="res://objects/door.tscn" id="4_door"]
+[ext_resource type="PackedScene" uid="uid://7frggh7ur0vm" path="res://objects/lever.tscn" id="5_lever"]
+
+[sub_resource type="RectangleShape2D" id="Shape_Ceiling"]
+size = Vector2(320, 40)
+
+[sub_resource type="RectangleShape2D" id="Shape_Floor"]
+size = Vector2(320, 40)
+
+[sub_resource type="RectangleShape2D" id="Shape_LeftWall"]
+size = Vector2(40, 440)
+
+[sub_resource type="RectangleShape2D" id="Shape_RightWall"]
+size = Vector2(40, 440)
+
+[sub_resource type="RectangleShape2D" id="Shape_Slab"]
+size = Vector2(240, 40)
+
+[node name="Level1_5" type="Node2D" node_paths=PackedStringArray("spawn_point", "exit")]
+script = ExtResource("1_level")
+spawn_point = NodePath("SpawnPoint")
+exit = NodePath("Exit")
+loop_seconds = 10
+max_ghosts = 2
+camera_zoom = 2
+
+[node name="Room" type="Node2D" parent="."]
+
+[node name="Ceiling" type="StaticBody2D" parent="Room"]
+position = Vector2(160, -20)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Room/Ceiling"]
+shape = SubResource("Shape_Ceiling")
+
+[node name="Polygon2D" type="Polygon2D" parent="Room/Ceiling"]
+color = Color(0.5, 0.5, 0.5, 1)
+polygon = PackedVector2Array(-160, -20, 160, -20, 160, 20, -160, 20)
+
+[node name="Floor" type="StaticBody2D" parent="Room"]
+position = Vector2(160, 380)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Room/Floor"]
+shape = SubResource("Shape_Floor")
+
+[node name="Polygon2D" type="Polygon2D" parent="Room/Floor"]
+color = Color(0.5, 0.5, 0.5, 1)
+polygon = PackedVector2Array(-160, -20, 160, -20, 160, 20, -160, 20)
+
+[node name="LeftWall" type="StaticBody2D" parent="Room"]
+position = Vector2(-20, 180)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Room/LeftWall"]
+shape = SubResource("Shape_LeftWall")
+
+[node name="Polygon2D" type="Polygon2D" parent="Room/LeftWall"]
+color = Color(0.5, 0.5, 0.5, 1)
+polygon = PackedVector2Array(-20, -220, 20, -220, 20, 220, -20, 220)
+
+[node name="RightWall" type="StaticBody2D" parent="Room"]
+position = Vector2(340, 180)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Room/RightWall"]
+shape = SubResource("Shape_RightWall")
+
+[node name="Polygon2D" type="Polygon2D" parent="Room/RightWall"]
+color = Color(0.5, 0.5, 0.5, 1)
+polygon = PackedVector2Array(-20, -220, 20, -220, 20, 220, -20, 220)
+
+[node name="Slab" type="StaticBody2D" parent="Room"]
+position = Vector2(120, 180)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Room/Slab"]
+shape = SubResource("Shape_Slab")
+
+[node name="Polygon2D" type="Polygon2D" parent="Room/Slab"]
+color = Color(0.5, 0.5, 0.5, 1)
+polygon = PackedVector2Array(-120, -20, 120, -20, 120, 20, -120, 20)
+
+[node name="Lever" parent="." instance=ExtResource("5_lever")]
+position = Vector2(70, 160)
+
+[node name="InvertedDoor" parent="." instance=ExtResource("4_door")]
+position = Vector2(180, 80)
+sources = Array[NodePath]([NodePath("../Lever")])
+inverted = true
+
+[node name="PressurePlate" parent="." instance=ExtResource("3_plate")]
+position = Vector2(280, 360)
+
+[node name="PlateDoor" parent="." instance=ExtResource("4_door")]
+position = Vector2(150, 280)
+sources = Array[NodePath]([NodePath("../PressurePlate")])
+
+[node name="LeverDoor" parent="." instance=ExtResource("4_door")]
+position = Vector2(95, 280)
+sources = Array[NodePath]([NodePath("../Lever")])
+
+[node name="Exit" parent="." instance=ExtResource("2_exit")]
+position = Vector2(35, 360)
+
+[node name="SpawnPoint" type="Marker2D" parent="."]
+position = Vector2(24, 120)
