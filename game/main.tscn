@@ -1,6 +1,8 @@
 [gd_scene format=3 uid="uid://bewplgn50p2le"]
 
 [ext_resource type="PackedScene" uid="uid://br3ucd37ria6" path="res://actors/player.tscn" id="1_player"]
+[ext_resource type="Script" uid="uid://dkspvijfesdvj" path="res://game/loop_manager.gd" id="2_loop"]
+[ext_resource type="PackedScene" uid="uid://bbhw52j86weeg" path="res://ui/hud.tscn" id="3_hud"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_floor"]
 size = Vector2(720, 80)
@@ -77,3 +79,10 @@ position = Vector2(120, 1160)
 
 [node name="Player" parent="." node_paths=PackedStringArray("spawn_point") instance=ExtResource("1_player")]
 spawn_point = NodePath("../SpawnPoint")
+
+[node name="LoopManager" type="Node" parent="."]
+process_physics_priority = 100
+script = ExtResource("2_loop")
+
+[node name="HUD" parent="." node_paths=PackedStringArray("loop_manager") instance=ExtResource("3_hud")]
+loop_manager = NodePath("../LoopManager")
