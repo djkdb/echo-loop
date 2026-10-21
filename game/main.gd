@@ -19,6 +19,12 @@ func load_level(scene: PackedScene) -> void:
 		_level_root.remove_child(level)
 		level.queue_free()
 	level = scene.instantiate() as Level
+	# 레벨을 붙이기 전에 Player를 새 스폰으로 옮긴다. 이전 레벨 위치에 있는 채로 붙이면 그 자리에 겹친
+	# 출구·판이 물리 스텝 두 번 뒤까지 낡은 겹침으로 남아 시작하자마자 CLEAR된다.
+	# (첫 시작 때는 물리 서버가 아직 씬의 Player 위치를 쓰므로 main.tscn에서 Player를 방 밖 멀리 둔다.)
+	var spawn: Node2D = level.get_node_or_null("SpawnPoint")
+	if spawn != null:
+		_player.global_position = spawn.position
 	_level_root.add_child(level)
 	_player.spawn_point = level.spawn_point
 	level.exit.reached.connect(_loop_manager.clear_stage)

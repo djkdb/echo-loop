@@ -19,6 +19,7 @@ level_scene = ExtResource("6_level")
 [node name="Ghosts" type="Node2D" parent="."]
 
 [node name="Player" parent="." instance=ExtResource("1_player")]
+position = Vector2(-10000, -10000)
 
 [node name="LoopManager" type="Node" parent="." node_paths=PackedStringArray("player", "ghosts_root")]
 process_physics_priority = 100
