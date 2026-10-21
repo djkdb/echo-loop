@@ -44,6 +44,10 @@
 10. **상호작용(E):** Player와 고스트(녹화된 interact 틱에)가 `interactables` 그룹 중 자기와 겹친 Area2D의 `interact()`를 부른다.
 11. **레이저:** Player가 닿으면 루프 실패. 고스트는 빔을 몸으로 막는 방패라 붕괴하지 않고 빔이 고스트에서 끝난다.
 12. **루프 리셋은 틱 끝(LoopManager 차례)에만.** 중간에 실패·클리어를 알리는 쪽은 `fail_loop()`/`clear_stage()`로 표시만 한다.
+13. **움직이는 고스트 위에서는 점프할 수 없다.** 고스트 녹화에서 이번 틱 위치가 앞뒤 틱보다 높으면(점프·낙하·발판에 실림)
+    그 고스트는 점프 발판이 아니다(`Ghost.supports_jump`, 코요테도 채우지 않음). Player는 플랫폼 속도를 물려받지 않는다
+    (`platform_on_leave = DO_NOTHING`). 둘 다 없으면 고스트 점프에 올라타 뛰는 부스트(실측 352~693px)로
+    고스트 1명이 탑 2단보다 높이 닿아 높이 퍼즐이 성립하지 않는다.
 
 ## 처리 순서 (process_physics_priority, 작을수록 먼저)
 
@@ -81,17 +85,19 @@ sync_to_physics 바디(고스트·발판·상자)의 이동은 모든 `_physics_
 
 ```
 res://
-├─ game/        main.tscn/.gd, loop_manager.gd, replay.tscn/.gd(리플레이 씬)
+├─ game/        main.tscn/.gd, loop_manager.gd, replay.tscn/.gd(리플레이 씬), room_camera.gd(방을 화면 영역에 맞추는 카메라)
 │               palette.gd(색), fx.gd·reels_mode.gd(Main 안 연출 노드), puff·glitch_sprite·flash_ring·clear_paths(연출 조각)
 ├─ actors/      player.tscn/.gd, ghost.tscn/.gd, character_visual.gd(몸 그림), ghost_trail.gd(잔상), body_shape.tres
 ├─ objects/     pressure_plate, door, color_door, lever, timed_button, moving_platform, laser, box, exit
 │               (씬+스크립트 같은 폴더) + signal_sources.gd(공용)
-├─ levels/      level.gd, level_1_2.tscn, level_test*.tscn …, room_style.gd·signal_wires.gd(레벨이 런타임에 붙이는 그림)
+├─ levels/      level.gd, level_<챕터>_<번호>.tscn, level_test*.tscn, room_style.gd·signal_wires.gd(레벨이 런타임에 붙이는 그림)
 ├─ ui/          hud.tscn/.gd, ghost_slots.gd, timeline.gd(hud.tscn 안 노드 스크립트)
 ├─ autoload/    replay_io.gd(ReplayIO), sfx.gd(Sfx)
 ├─ assets/      fonts/ (Noto Sans KR = 기본, Space Grotesk 700 + 한글 폴백 = hud_font.tres, 모두 OFL)
 │               fx/ (glow_texture·additive = 가산 글로우, rewind·glitch 셰이더)
-└─ tests/       run_all.gd, test_base.gd, cases/test_*.gd (자동 테스트, 내보내기에서 제외)
+├─ solutions/   <stage>.json (개발자 정답 리플레이 = 별 3개 기준, 내보내기에서 제외)
+└─ tests/       run_all.gd, test_base.gd, cases/test_*.gd (자동 테스트), solution_case.gd(정답 검증 공용),
+                bots/<stage>.gd (정답을 실제로 풀어 solutions/를 만드는 봇) — 모두 내보내기에서 제외
 ```
 
 씬과 그 스크립트는 같은 폴더에 같은 이름으로 둔다.
@@ -107,17 +113,34 @@ res://
   그림·애니메이션·소리는 `_process`(또는 연출 노드)가 그 상태를 읽어 만든다. 연출의 난수는 게임플레이에 영향이 없어야 한다.
 - 글로우·셰이더는 Compatibility 렌더러용: 방사형 그라데이션 + ADD 블렌드 스프라이트, `canvas_item` 셰이더.
 - 씬의 Polygon2D 그림은 에디터 미리보기용으로 남기고, 실행 중엔 스크립트 `_draw`가 그린다(문·발판·상자·방).
-- 릴스 모드(F9, `ReelsMode`): HUD 숨김, 방 내부를 화면 x 24~612·y 300~1030에 맞춤, 상단 y 120~280 텍스트 한 줄.
+- 릴스 모드(F9, `ReelsMode`): HUD 숨김, 방 내부를 화면 x 24~612·y 300~1030에 꽉 차게(줌 상한 없음), 릴스 텍스트 자리 y 240~300에 한 줄.
 - 리플레이: CLEAR 때 `user://replays/<stage>.json` 저장, `game/replay.tscn`으로 재생. Movie Maker 렌더:
   `godot --path . --write-movie out.avi --fixed-fps 60 res://game/replay.tscn -- --stage=level_1_2 --loops=1 --reels`
 - 효과음: `Sfx.play(name)`(SFX 버스, 코드 합성). 새 소리는 `autoload/sfx.gd`의 streams에 추가.
 
-## 레벨 배치
+## 레벨 배치 (화면 좌표 기준, 뷰포트 720×1280)
 
-- 각 레벨 위쪽 **y 240~440은 릴스 텍스트 자리**로 비워 둔다(지형·오브젝트를 두지 않는다). 그 위 y 0~240은 HUD 자리.
-- 화면 아래 y 1192~1272에는 루프 타임라인이 겹쳐 그려진다(바닥 위에).
-- 테스트 방: `level_test`(계단 방), `level_test_paradox`(레버로 패러독스), `level_test_objects`(오브젝트 6종 시연).
-  Main 노드의 `level_scene`을 바꿔서 연다.
+| 화면 y | 영역 |
+| --- | --- |
+| 0~240 | HUD (시간 바, LOOP n, 나 ×n, 고스트 슬롯) |
+| 240~300 | 릴스 텍스트 자리 (릴스 모드 문구, 보통 화면에선 비움) |
+| 300~1030 | 방 (`RoomCamera`가 방 내부를 여기 가운데에 맞춘다) |
+| 1030~1280 | 인스타 캡션·루프 타임라인·모바일 터치 버튼 |
+
+- 방은 월드 좌표 (0,0)~(W,H)를 내부로, 바깥에 두께 40 벽 `Floor`·`Ceiling`·`LeftWall`·`RightWall`(Room 아래 StaticBody2D)을 둔다.
+  `Level.room_rect()`가 이 이름으로 내부를 찾고, 카메라가 `camera_zoom`(1.5~2.0)으로 키운다. 넘치면 들어갈 만큼 줄인다.
+- **스케일:** 몸·이동·점프·중력 수치는 그대로(몸 40×64, 6px/틱, 점프 176px)이고 방을 작게 짜서 줌으로 키운다.
+  챕터 1 = 줌 2.0, 내부 320×360(폭 8명). 챕터 2·3 = 줌 1.5, 내부 최대 480×486(보통 440×480). 바닥 = y H.
+- **닿는 높이(바닥 기준 발 높이):** 혼자 176, 서 있는 고스트 1명 밟고 240(고스트 착지 틱에 뛰면 최대 255), 2단 304, 3단 368.
+  높이로 고스트 수를 강제할 때는 이 값에서 15px 이상 여유를 둔다.
+- **판과 그 판이 여는 문 사이는 70px 이상** 띄운다. 판에서 내려선 몸이 바로 문간에 들어서면 끼임 방지로 문이 안 닫혀
+  혼자서도 지나간다(1-5 초안에서 실제로 났던 구멍).
+- 높이 퍼즐이 아닌 방은 칸막이를 천장까지 올려 점프로 넘는 길을 막는다.
+- 레벨마다 `solutions/<stage>.json`(정답 리플레이)과 `tests/bots/<stage>.gd`(그 정답을 실제로 푸는 봇)가 있다.
+  레벨을 고치면 `godot --headless --fixed-fps 60 --path . -s tests/run_all.gd -- --dir=bots --only=<stage>`로 다시 만든다.
+  `tests/cases/test_70_solutions_*.gd`가 정답 재현·CLEAR·고스트 하나라도 빼면 실패를 검증한다. 설계 근거는 `docs/levels.md`.
+- 테스트 방: `level_test`(유닛 테스트용 큰 물리 샌드박스, 줌 축소로 표시), `level_test_paradox`(레버로 패러독스),
+  `level_test_objects`(오브젝트 6종 시연). Main 노드의 `level_scene`을 바꿔서 연다.
 
 ## 입력 액션 (project.godot에 등록된 이름 그대로 사용)
 

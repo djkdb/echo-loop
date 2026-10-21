@@ -11,11 +11,12 @@ func run_case() -> void:
 	level.exit.process_mode = Node.PROCESS_MODE_INHERIT
 	DirAccess.remove_absolute(ReplayIO.path_for("level_1_2"))
 	await restart()
-	await run_loop(func(t: int) -> void: steer_to(280.0), 120)
+	await run_loop(func(t: int) -> void: steer_to(90.0), 120)
+	var st: Array = [0, 0, ""]
 	await run_loop(func(t: int) -> void:
-		if t > 40: Input.action_press("move_right")
-		if t == 55: Input.action_press("jump")
-		if t == 57: Input.action_release("jump"), -1, 600)
+		if t > 20:
+			go(1)
+			tap_step(st, 0, player.global_position.x >= 34.0), -1, 600)
 	check("precondition: stage cleared", lm.cleared)
 	await tick(2)
 	var originals: Array = [lm.ghosts()[0].frames().duplicate(true), player.recording.duplicate(true)]
@@ -59,6 +60,6 @@ func run_case() -> void:
 		door_opened[0] = door_opened[0] or door.is_open
 	var me: Ghost = replay.ghosts[1]
 	check("replay ghosts follow the recordings every tick", ok_pos[0], "first mismatch tick=%d" % ok_pos[1])
-	check("replay: keeper opens the door, me reaches the exit, nobody collapses", door_opened[0] and me.global_position.x > 560.0 and replay.ghosts.all(func(g: Ghost) -> bool: return g.alive), "me=%s" % me.global_position)
+	check("replay: keeper opens the door, me reaches the exit, nobody collapses", door_opened[0] and me.global_position.x > 250.0 and replay.ghosts.all(func(g: Ghost) -> bool: return g.alive), "me=%s" % me.global_position)
 	check("replay: last run drawn in 'me' style", me.me_style and not replay.ghosts[0].me_style)
 	replay.queue_free()

@@ -7,6 +7,10 @@ extends Node2D
 @export var exit: Exit
 @export var loop_seconds: float = 10.0
 @export var max_ghosts: int = 2
+## 보통 화면 줌. 몸·점프 수치는 그대로 두고 방을 작게 짜서 줌으로 키운다(RoomCamera).
+## 챕터 1은 2.0(방 내부 약 320x360 = 폭 8명), 이후는 1.5 중심(약 480x486까지). 방이 화면 y 300~1030에
+## 다 안 들어가면 카메라가 들어갈 만큼 줄인다.
+@export_range(1.5, 2.0, 0.05) var camera_zoom: float = 1.5
 
 
 func _ready() -> void:
@@ -20,7 +24,7 @@ func _ready() -> void:
 
 
 ## 방 내부(벽 안쪽) 사각형. 바닥·천장·양쪽 벽 이름(Floor, Ceiling, LeftWall, RightWall)으로 찾고,
-## 없으면 화면 전체. 방 스타일과 릴스 모드 카메라가 쓴다.
+## 없으면 화면 전체. 방 스타일과 카메라(RoomCamera)가 쓴다.
 func room_rect() -> Rect2:
 	var left: float = 0.0
 	var right: float = 720.0

@@ -16,7 +16,7 @@ func run_case() -> void:
 	Sfx.played.connect(func(n: String) -> void: heard.append([n, lm.tick]))
 	await restart()
 	await run_loop(func(t: int) -> void:
-		steer_to(280.0)
+		steer_to(90.0)
 		if t == 100: Input.action_press("jump")
 		if t == 102: Input.action_release("jump"))
 	var first: Array = heard.duplicate()
@@ -28,10 +28,11 @@ func run_case() -> void:
 	await frame()
 	check("loop reset plays the rewind sound", has.call(heard, "rewind"))
 	heard.clear()
+	var st: Array = [0, 0, ""]
 	await run_loop(func(t: int) -> void:
-		if t > 40: Input.action_press("move_right")
-		if t == 55: Input.action_press("jump")
-		if t == 57: Input.action_release("jump"), -1, 600)
+		if t > 20:
+			go(1)
+			tap_step(st, 0, player.global_position.x >= 34.0), -1, 600)
 	await frame()
 	await frame()
 	check("CLEAR plays the clear sound", has.call(heard, "clear"))

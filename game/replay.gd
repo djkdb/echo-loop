@@ -5,10 +5,12 @@ extends Node2D
 ## 명령줄(Movie Maker 렌더 예):
 ##   godot --path . --write-movie replay.avi --fixed-fps 60 res://game/replay.tscn -- --stage=level_1_2 --loops=1 --reels
 ##   --stage=<id>  리플레이 이름(기본 stage_id)   --loops=<n>  n번 재생하고 종료(0 = 무한)   --reels  릴스 모드로
+##   --solution  user://replays 대신 개발자 정답(solutions/<id>.json)을 재생(릴스 "정답편")
 
 @export var stage_id: String = "level_1_2"
 @export var loops: int = 0
 @export var reels: bool = false
+@export var solution: bool = false
 @export var ghost_scene: PackedScene
 
 var level: Level
@@ -29,10 +31,12 @@ func _ready() -> void:
 			loops = int(arg.trim_prefix("--loops="))
 		elif arg == "--reels":
 			reels = true
+		elif arg == "--solution":
+			solution = true
 	process_physics_priority = 100
-	var doc: Dictionary = ReplayIO.load_run(stage_id)
+	var doc: Dictionary = ReplayIO.load_solution(stage_id) if solution else ReplayIO.load_run(stage_id)
 	if doc.is_empty():
-		push_warning("리플레이 %s가 없다: 먼저 그 스테이지를 CLEAR할 것." % ReplayIO.path_for(stage_id))
+		push_warning("리플레이 %s가 없다: 먼저 그 스테이지를 CLEAR할 것." % (ReplayIO.solution_path(stage_id) if solution else ReplayIO.path_for(stage_id)))
 		return
 	start(doc)
 

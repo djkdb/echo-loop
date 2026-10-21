@@ -5,92 +5,90 @@
 [ext_resource type="PackedScene" uid="uid://8rtice17j7mo" path="res://objects/pressure_plate.tscn" id="3_plate"]
 [ext_resource type="PackedScene" uid="uid://d3q08poj7t8pt" path="res://objects/door.tscn" id="4_door"]
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_ceiling"]
-size = Vector2(720, 40)
+[sub_resource type="RectangleShape2D" id="Shape_Ceiling"]
+size = Vector2(320, 40)
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_floor"]
-size = Vector2(720, 80)
+[sub_resource type="RectangleShape2D" id="Shape_Floor"]
+size = Vector2(320, 40)
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_leftwall"]
-size = Vector2(40, 760)
+[sub_resource type="RectangleShape2D" id="Shape_LeftWall"]
+size = Vector2(40, 440)
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_rightwall"]
-size = Vector2(40, 760)
+[sub_resource type="RectangleShape2D" id="Shape_RightWall"]
+size = Vector2(40, 440)
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_divider"]
-size = Vector2(40, 560)
+[sub_resource type="RectangleShape2D" id="Shape_Divider"]
+size = Vector2(40, 200)
 
 [node name="Level1_2" type="Node2D" node_paths=PackedStringArray("spawn_point", "exit")]
 script = ExtResource("1_level")
 spawn_point = NodePath("SpawnPoint")
 exit = NodePath("Exit")
+loop_seconds = 10
 max_ghosts = 1
-
-[node name="Background" type="Polygon2D" parent="."]
-color = Color(0.17, 0.17, 0.18, 1)
-polygon = PackedVector2Array(0, 0, 720, 0, 720, 1280, 0, 1280)
+camera_zoom = 2
 
 [node name="Room" type="Node2D" parent="."]
 
 [node name="Ceiling" type="StaticBody2D" parent="Room"]
-position = Vector2(360, 460)
+position = Vector2(160, -20)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Room/Ceiling"]
-shape = SubResource("RectangleShape2D_ceiling")
+shape = SubResource("Shape_Ceiling")
 
 [node name="Polygon2D" type="Polygon2D" parent="Room/Ceiling"]
 color = Color(0.5, 0.5, 0.5, 1)
-polygon = PackedVector2Array(-360, -20, 360, -20, 360, 20, -360, 20)
+polygon = PackedVector2Array(-160, -20, 160, -20, 160, 20, -160, 20)
 
 [node name="Floor" type="StaticBody2D" parent="Room"]
-position = Vector2(360, 1240)
+position = Vector2(160, 380)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Room/Floor"]
-shape = SubResource("RectangleShape2D_floor")
+shape = SubResource("Shape_Floor")
 
 [node name="Polygon2D" type="Polygon2D" parent="Room/Floor"]
 color = Color(0.5, 0.5, 0.5, 1)
-polygon = PackedVector2Array(-360, -40, 360, -40, 360, 40, -360, 40)
+polygon = PackedVector2Array(-160, -20, 160, -20, 160, 20, -160, 20)
 
 [node name="LeftWall" type="StaticBody2D" parent="Room"]
-position = Vector2(20, 820)
+position = Vector2(-20, 180)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Room/LeftWall"]
-shape = SubResource("RectangleShape2D_leftwall")
+shape = SubResource("Shape_LeftWall")
 
 [node name="Polygon2D" type="Polygon2D" parent="Room/LeftWall"]
 color = Color(0.5, 0.5, 0.5, 1)
-polygon = PackedVector2Array(-20, -380, 20, -380, 20, 380, -20, 380)
+polygon = PackedVector2Array(-20, -220, 20, -220, 20, 220, -20, 220)
 
 [node name="RightWall" type="StaticBody2D" parent="Room"]
-position = Vector2(700, 820)
+position = Vector2(340, 180)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Room/RightWall"]
-shape = SubResource("RectangleShape2D_rightwall")
+shape = SubResource("Shape_RightWall")
 
 [node name="Polygon2D" type="Polygon2D" parent="Room/RightWall"]
 color = Color(0.5, 0.5, 0.5, 1)
-polygon = PackedVector2Array(-20, -380, 20, -380, 20, 380, -20, 380)
+polygon = PackedVector2Array(-20, -220, 20, -220, 20, 220, -20, 220)
 
 [node name="Divider" type="StaticBody2D" parent="Room"]
-position = Vector2(480, 760)
+position = Vector2(220, 100)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Room/Divider"]
-shape = SubResource("RectangleShape2D_divider")
+shape = SubResource("Shape_Divider")
 
 [node name="Polygon2D" type="Polygon2D" parent="Room/Divider"]
 color = Color(0.5, 0.5, 0.5, 1)
-polygon = PackedVector2Array(-20, -280, 20, -280, 20, 280, -20, 280)
+polygon = PackedVector2Array(-20, -100, 20, -100, 20, 100, -20, 100)
 
 [node name="PressurePlate" parent="." instance=ExtResource("3_plate")]
-position = Vector2(280, 1200)
+position = Vector2(90, 360)
 
 [node name="Door" parent="." instance=ExtResource("4_door")]
-position = Vector2(480, 1120)
+position = Vector2(220, 280)
 sources = Array[NodePath]([NodePath("../PressurePlate")])
 
 [node name="Exit" parent="." instance=ExtResource("2_exit")]
-position = Vector2(600, 1200)
+position = Vector2(285, 360)
 
 [node name="SpawnPoint" type="Marker2D" parent="."]
-position = Vector2(100, 1160)
+position = Vector2(26, 320)

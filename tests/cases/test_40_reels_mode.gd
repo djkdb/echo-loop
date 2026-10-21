@@ -1,5 +1,6 @@
 extends "res://tests/test_base.gd"
-## 릴스 모드(F9): HUD 숨김, 방이 y 300~1030·오른쪽 띠 밖에 꽉 차게, 상단 텍스트, 다시 F9로 원래대로.
+## 보통 화면: 방이 y 300~1030 안에 레벨 줌으로. 릴스 모드(F9): HUD 숨김, 방이 y 300~1030·오른쪽 띠 밖에 꽉 차게,
+## 릴스 텍스트(y 240~300), 다시 F9로 원래대로.
 
 
 func test_level() -> String:
@@ -11,6 +12,8 @@ func run_case() -> void:
 	# 루프 시작 화면 흔들림(0.3초)이 끝난 뒤에 잰다
 	await tick(30)
 	var normal: Rect2 = reels.room_screen_rect()
+	var area: Rect2 = RoomCamera.NORMAL_TARGET
+	check("normal view: room inside y 300~1030 at the level's zoom (2.0 = 640px wide)", area.grow(0.5).encloses(normal) and absf(normal.size.x - 640.0) < 1.0, str(normal))
 	await tap_key(KEY_F9)
 	await frame()
 	await frame()
