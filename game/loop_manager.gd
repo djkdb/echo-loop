@@ -15,6 +15,8 @@ signal stage_restarted
 signal stage_cleared
 ## 지금의 나가 레이저에 닿아 루프가 실패했을 때(리셋 직전). 이번 녹화는 고스트로 남지 않는다.
 signal loop_failed
+## 되돌리기·덮어쓰기 선택으로 고스트 구성이 바뀌고 루프를 처음부터 할 때(리셋 직전).
+signal ghosts_changed
 
 @export var player: Player
 @export var ghosts_root: Node2D
@@ -90,6 +92,7 @@ func undo_ghost() -> void:
 	ghosts_root.remove_child(ghost)
 	ghost.queue_free()
 	loop_index = maxi(loop_index - 1, 1)
+	ghosts_changed.emit()
 	_reset_all()
 
 
@@ -100,6 +103,7 @@ func select_ghost(n: int) -> void:
 	overwrite_target = 0 if overwrite_target == n else n
 	for ghost: Ghost in _ghosts:
 		ghost.benched = ghost.number == overwrite_target
+	ghosts_changed.emit()
 	_reset_all()
 
 
