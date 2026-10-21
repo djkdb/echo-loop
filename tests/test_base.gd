@@ -312,3 +312,16 @@ func go(d: int) -> void:
 		Input.action_press("move_left"); Input.action_release("move_right")
 	else:
 		Input.action_release("move_right"); Input.action_release("move_left")
+
+
+## 봇용 구멍 건너기: step 단계에서 from_x까지 가서 뛰고, step+1 단계에서 to_x로 날아가 내려앉으면 step+2로.
+func hop_step(st: Array, step: int, from_x: float, to_x: float) -> void:
+	var p: Vector2 = player.global_position
+	if st[0] == step:
+		steer_to(from_x)
+		tap_step(st, step, absf(p.x - from_x) < 4.0 and player.is_on_floor())
+	elif st[0] == step + 1:
+		steer_to(to_x)
+		tap_step(st, -1, false)
+		if st[1] == 0 and player.is_on_floor() and absf(p.x - to_x) < 4.0:
+			st[0] = step + 2
