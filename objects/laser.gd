@@ -17,8 +17,10 @@ var is_on: bool = false
 var beam_length: float = 0.0
 
 var _sources: Array[Node] = []
-## Area2D 겹침 목록은 리셋 직후 첫 틱에 리셋 전 위치 기준이라(측정) 그 틱은 판정하지 않는다.
-var _ignore_stale_overlaps: bool = false
+## Area2D 겹침 목록은 리셋 뒤 물리 스텝이 한 번 돌고 나서야 새 위치를 반영한다(측정: 틱 끝 리셋이면 다음 1틱이 낡음).
+## 그 사이에 판정하면 리셋 전 위치의 바디 때문에 판이 눌리거나 출구에서 다시 CLEAR가 된다.
+## 리셋이 틱 중간·시작에 일어나도 맞도록 리셋된 물리 프레임에서 2프레임이 지날 때까지 겹침을 쓰지 않는다.
+var _reset_frame: int = -100
 
 @onready var _beam: Area2D = $Beam
 @onready var _beam_shape: CollisionShape2D = $Beam/CollisionShape2D
@@ -34,8 +36,7 @@ func _ready() -> void:
 
 func _physics_process(_delta: float) -> void:
 	_update_beam()
-	if _ignore_stale_overlaps:
-		_ignore_stale_overlaps = false
+	if Engine.get_physics_frames() - _reset_frame < 2:
 		return
 	if not is_on:
 		return
@@ -47,7 +48,7 @@ func _physics_process(_delta: float) -> void:
 
 
 func reset() -> void:
-	_ignore_stale_overlaps = true
+	_reset_frame = Engine.get_physics_frames()
 	_update_beam()
 
 

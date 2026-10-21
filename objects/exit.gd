@@ -8,9 +8,10 @@ extends Area2D
 signal reached
 
 var _player_inside: bool = false
-## Area2D의 겹침 목록은 리셋 직후 첫 틱에 아직 리셋 전 위치 기준이다(측정).
-## 그 틱을 쓰면 출구에서 R을 눌러 다시 시작해도 바로 또 CLEAR가 된다.
-var _ignore_stale_overlaps: bool = false
+## Area2D 겹침 목록은 리셋 뒤 물리 스텝이 한 번 돌고 나서야 새 위치를 반영한다(측정: 틱 끝 리셋이면 다음 1틱이 낡음).
+## 그 사이에 판정하면 리셋 전 위치의 바디 때문에 판이 눌리거나 출구에서 다시 CLEAR가 된다.
+## 리셋이 틱 중간·시작에 일어나도 맞도록 리셋된 물리 프레임에서 2프레임이 지날 때까지 겹침을 쓰지 않는다.
+var _reset_frame: int = -100
 
 
 func _ready() -> void:
@@ -18,8 +19,7 @@ func _ready() -> void:
 
 
 func _physics_process(_delta: float) -> void:
-	if _ignore_stale_overlaps:
-		_ignore_stale_overlaps = false
+	if Engine.get_physics_frames() - _reset_frame < 2:
 		return
 	var inside: bool = false
 	for body: Node2D in get_overlapping_bodies():
@@ -34,4 +34,4 @@ func _physics_process(_delta: float) -> void:
 
 func reset() -> void:
 	_player_inside = false
-	_ignore_stale_overlaps = true
+	_reset_frame = Engine.get_physics_frames()
