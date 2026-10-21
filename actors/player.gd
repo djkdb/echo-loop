@@ -87,9 +87,11 @@ func _process(_delta: float) -> void:
 	if _fx_jump:
 		_fx_jump = false
 		_body.pulse(Vector2(0.85, 1.15), 0.12)
+		Sfx.play("jump")
 	if _fx_land:
 		_fx_land = false
 		_body.pulse(Vector2(1.15, 0.85), 0.08)
+		Sfx.play("land", -6.0)
 		Puff.burst(get_parent(), global_position + Vector2(0, 32), Palette.ME, 3)
 
 

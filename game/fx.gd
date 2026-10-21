@@ -58,6 +58,7 @@ func _process(delta: float) -> void:
 		_rewind_left = REWIND_SECONDS
 		_shake_left = SHAKE_SECONDS
 		_clear_paths.visible = false
+		Sfx.play("rewind", -4.0)
 		rewind_started.emit()
 	if _pending_clear:
 		_pending_clear = false
@@ -98,6 +99,7 @@ func _spawn_glitch(g: Ghost) -> void:
 	var s := GlitchSprite.new()
 	s.setup(Palette.ghost(g.number), g.global_position, GLITCH_SECONDS)
 	add_child(s)
+	Sfx.play("collapse")
 
 
 func _show_clear() -> void:
@@ -111,4 +113,5 @@ func _show_clear() -> void:
 		paths.append({"color": Palette.ghost(g.number), "frames": g.frames()})
 	paths.append({"color": Palette.ME, "frames": loop_manager.player.recording.duplicate()})
 	_clear_paths.show_paths(paths, PATH_REVEAL_SECONDS)
+	Sfx.play("clear")
 	clear_shown.emit()

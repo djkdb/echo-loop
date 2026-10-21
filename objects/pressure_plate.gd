@@ -62,6 +62,8 @@ func _set_on(on: bool) -> void:
 
 ## 연출: 눌리면 2px 내려앉고 0.1초 번쩍인 뒤 은은한 글로우를 유지한다.
 func _process(delta: float) -> void:
+	if _flash >= 0.1:
+		Sfx.play("plate")
 	_flash = maxf(_flash - delta, 0.0)
 	_visual.position.y = 2.0 if is_on else 0.0
 	var a: float = 0.0

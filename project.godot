@@ -17,6 +17,7 @@ config/features=PackedStringArray("4.7", "GL Compatibility")
 [autoload]
 
 ReplayIO="*res://autoload/replay_io.gd"
+Sfx="*res://autoload/sfx.gd"
 
 [display]
 

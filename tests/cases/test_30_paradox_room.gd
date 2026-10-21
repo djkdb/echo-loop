@@ -33,6 +33,8 @@ func run_case() -> void:
 			hit = i
 			break
 	collapses.clear()
+	var heard: Array = []
+	Sfx.played.connect(func(n: String) -> void: heard.append(n))
 	var marks: Array = []
 	var lp: Array = await run_loop(func(t: int) -> void:
 		if t < 40: steer_to(180.0)
@@ -43,3 +45,6 @@ func run_case() -> void:
 	check("paradox: pulling the lever closes D1 and the keeper collapses on touching it", collapses.size() == 1 and collapses[0][1] == hit, "collapses=%s expected %d" % [collapses, hit])
 	check("paradox: D2 stays closed, no CLEAR", not lm.cleared)
 	check("timeline marks the collapse tick on ghost 1's row", marks.size() == 1 and marks[0] == hit + 1, str(marks))
+	await frame()
+	await frame()
+	check("sounds: lever pull and paradox collapse are heard", heard.has("lever") and heard.has("collapse"), str(heard))

@@ -38,5 +38,7 @@ func _set_on(on: bool) -> void:
 ## 연출: 손잡이가 0.1초에 걸쳐 넘어가고, 켜지면 손잡이 끝이 신호색으로.
 func _process(delta: float) -> void:
 	var target: float = deg_to_rad(35.0 if is_on else -35.0)
+	if is_on and is_equal_approx(_handle.rotation, deg_to_rad(-35.0)):
+		Sfx.play("lever")
 	_handle.rotation = move_toward(_handle.rotation, target, delta * deg_to_rad(700.0))
 	_knob.color = Palette.SIGNAL if is_on else Palette.SUB_TEXT

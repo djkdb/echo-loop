@@ -36,6 +36,8 @@ func _ready() -> void:
 
 func _process(delta: float) -> void:
 	var target: float = 1.0 if is_open else 0.0
+	if _open_anim != target and (_open_anim == 0.0 or _open_anim == 1.0):
+		Sfx.play("door", -3.0, 1.15 if is_open else 0.9)
 	if _open_anim != target:
 		_open_anim = move_toward(_open_anim, target, delta / SLIDE_SECONDS)
 		queue_redraw()

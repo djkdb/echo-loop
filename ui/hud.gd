@@ -10,6 +10,7 @@ extends CanvasLayer
 @export var warning_color: Color = Palette.DOOR
 
 var _warning_ticks: int = 0
+var _last_tick_second: int = -1
 
 @onready var _fill: ColorRect = $TimeBar/Fill
 @onready var _loop_label: Label = $LoopLabel
@@ -33,7 +34,14 @@ func _process(_delta: float) -> void:
 	# 왼쪽 끝을 기준으로 줄어들도록 크기 대신 scale.x를 쓴다(앵커·오프셋을 건드리지 않음).
 	_fill.scale.x = float(remaining) / float(loop_manager.loop_ticks)
 	_fill.color = warning_color if remaining <= _warning_ticks else bar_color
-	# 마지막 3초: 매초 시작에 막대가 번쩍인다(똑딱 소리와 같은 박자).
+	# 마지막 3초: 매초 시작에 막대가 번쩍이고 똑딱 소리가 난다.
+	if remaining <= _warning_ticks and remaining > 0 and not loop_manager.cleared:
+		var sec: int = ceili(float(remaining) / float(Engine.physics_ticks_per_second))
+		if sec != _last_tick_second:
+			_last_tick_second = sec
+			Sfx.play("tick", 0.0, 1.0 if sec % 2 == 1 else 0.8)
+	else:
+		_last_tick_second = -1
 	if remaining <= _warning_ticks and remaining > 0:
 		var phase: float = float(remaining % Engine.physics_ticks_per_second) / float(Engine.physics_ticks_per_second)
 		_fill.modulate = Color(1, 1, 1, 1).lerp(Color(1.6, 1.6, 1.6, 1), clampf((phase - 0.8) * 5.0, 0.0, 1.0))
