@@ -1,9 +1,7 @@
 [gd_scene format=3 uid="uid://br3ucd37ria6"]
 
 [ext_resource type="Script" uid="uid://dd63st8vvwjv1" path="res://actors/player.gd" id="1_player"]
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_body"]
-size = Vector2(40, 64)
+[ext_resource type="Shape2D" uid="uid://7rdaefbhpdxi" path="res://actors/body_shape.tres" id="2_shape"]
 
 [node name="Player" type="CharacterBody2D"]
 process_physics_priority = -10
@@ -12,14 +10,14 @@ collision_mask = 5
 script = ExtResource("1_player")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-shape = SubResource("RectangleShape2D_body")
+shape = ExtResource("2_shape")
 
 [node name="Visual" type="Node2D" parent="."]
 
 [node name="Body" type="Polygon2D" parent="Visual"]
-color = Color(0.3, 0.65, 1, 1)
+color = Color(0.95, 0.95, 0.95, 1)
 polygon = PackedVector2Array(-20, -32, 20, -32, 20, 32, -20, 32)
 
 [node name="Eye" type="Polygon2D" parent="Visual"]
-color = Color(1, 1, 1, 1)
+color = Color(0.1, 0.1, 0.12, 1)
 polygon = PackedVector2Array(6, -22, 14, -22, 14, -14, 6, -14)

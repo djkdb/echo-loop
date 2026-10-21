@@ -10,6 +10,8 @@ extends CharacterBody2D
 @export var coyote_seconds: float = 0.1
 @export var jump_buffer_seconds: float = 0.1
 
+const HOLD_BLOCKED_ACTIONS: Array[StringName] = [&"move_left", &"move_right", &"jump"]
+
 ## 고스트가 그대로 따라갈 경로. 입력이 아니라 위치를 남겨야 환경이 조금 달라져도 경로가 어긋나지 않는다.
 ## 항목: {"pos": Vector2, "flip": bool, "interact": bool}
 var recording: Array[Dictionary] = []
@@ -20,8 +22,13 @@ var _jump_buffer_ticks: int = 0
 var _coyote_ticks_left: int = 0
 var _jump_buffer_ticks_left: int = 0
 var _flip: bool = false
+## 리셋 순간 누르고 있던 키. 한 번 뗄 때까지 무시해서 루프 끝의 입력이 다음 루프로 새지 않게 한다.
+var _held_on_reset: Array[StringName] = []
+## 루프 시작 때 같은 스폰에서 겹쳐 있는 고스트. 겹친 채로 충돌하면 밀려나므로 떨어질 때까지 통과시킨다.
+var _passthrough_ghosts: Array[Ghost] = []
 
 @onready var _visual: Node2D = $Visual
+@onready var _shape: CollisionShape2D = $CollisionShape2D
 
 
 func _ready() -> void:
@@ -32,7 +39,9 @@ func _ready() -> void:
 
 
 func _physics_process(delta: float) -> void:
-	var direction: float = Input.get_axis("move_left", "move_right")
+	_unblock_released_actions()
+	_restore_separated_ghosts()
+	var direction: float = _action_strength(&"move_right") - _action_strength(&"move_left")
 	velocity.x = direction * move_speed
 	if direction != 0.0:
 		_flip = direction < 0.0
@@ -60,16 +69,22 @@ func reset() -> void:
 	_jump_buffer_ticks_left = 0
 	_flip = false
 	_visual.scale.x = 1.0
+	_held_on_reset.clear()
+	for action: StringName in HOLD_BLOCKED_ACTIONS:
+		if Input.is_action_pressed(action):
+			_held_on_reset.append(action)
+	_pass_through_all_ghosts()
 	if spawn_point == null:
 		push_warning("Player.spawn_point가 비어 있어 현재 위치에서 시작한다.")
-		return
-	global_position = spawn_point.global_position
+	else:
+		global_position = spawn_point.global_position
+	_refresh_contact_state()
 
 
 func _update_jump() -> void:
 	if is_on_floor():
 		_coyote_ticks_left = _coyote_ticks
-	if Input.is_action_just_pressed("jump"):
+	if Input.is_action_just_pressed("jump") and not _held_on_reset.has(&"jump"):
 		_jump_buffer_ticks_left = _jump_buffer_ticks
 
 	if _coyote_ticks_left > 0 and _jump_buffer_ticks_left > 0:
@@ -82,3 +97,64 @@ func _update_jump() -> void:
 		_coyote_ticks_left -= 1
 	if _jump_buffer_ticks_left > 0:
 		_jump_buffer_ticks_left -= 1
+
+
+func _unblock_released_actions() -> void:
+	for action: StringName in _held_on_reset.duplicate():
+		if not Input.is_action_pressed(action):
+			_held_on_reset.erase(action)
+
+
+func _action_strength(action: StringName) -> float:
+	if _held_on_reset.has(action):
+		return 0.0
+	return Input.get_action_strength(action)
+
+
+## CharacterBody2D는 직전 move_and_slide의 바닥·플랫폼 정보를 다음 move_and_slide에서 쓴다.
+## 리셋으로 순간이동하면 그 정보가 낡아서, 루프 끝에 밟고 있던 고스트가 리셋 위치로 순간이동하는
+## 속도를 플랫폼 속도로 받아 튕겨 나간다. 플랫폼 속도를 무시한 채 제자리 이동을 한 번 해서 새로 계산한다.
+## (덤으로 첫 틱의 is_on_floor()가 이전 루프 상태에 좌우되지 않게 된다.)
+func _refresh_contact_state() -> void:
+	var floor_layers: int = platform_floor_layers
+	var wall_layers: int = platform_wall_layers
+	platform_floor_layers = 0
+	platform_wall_layers = 0
+	velocity = Vector2.ZERO
+	move_and_slide()
+	velocity = Vector2.ZERO
+	platform_floor_layers = floor_layers
+	platform_wall_layers = wall_layers
+
+
+func _pass_through_all_ghosts() -> void:
+	for ghost: Ghost in _passthrough_ghosts:
+		if is_instance_valid(ghost):
+			remove_collision_exception_with(ghost)
+	_passthrough_ghosts.clear()
+	# call_group 순서상 고스트가 아직 리셋되기 전일 수 있어 여기서는 겹침을 판정할 수 없다.
+	# 일단 전부 통과시키고, 매 틱 _restore_separated_ghosts에서 떨어진 고스트부터 다시 충돌시킨다.
+	for node: Node in get_tree().get_nodes_in_group("ghosts"):
+		var ghost: Ghost = node as Ghost
+		add_collision_exception_with(ghost)
+		_passthrough_ghosts.append(ghost)
+
+
+func _restore_separated_ghosts() -> void:
+	if _passthrough_ghosts.is_empty():
+		return
+	var my_rect: Rect2 = _shape.shape.get_rect()
+	my_rect.position += global_position
+	for ghost: Ghost in _passthrough_ghosts.duplicate():
+		if not is_instance_valid(ghost):
+			_passthrough_ghosts.erase(ghost)
+			continue
+		# Player와 고스트는 같은 body_shape.tres를 쓰므로 같은 사각형으로 겹침을 본다.
+		# 고스트가 먼저 돌아 replay_position은 이번 스텝에 갈 곳, global_position은 지금 물리 공간에 있는 곳이다.
+		# 둘 다에서 떨어져야 다시 충돌시켜도 밀려나지 않는다.
+		var base_rect: Rect2 = _shape.shape.get_rect()
+		var now_rect: Rect2 = Rect2(base_rect.position + ghost.global_position, base_rect.size)
+		var next_rect: Rect2 = Rect2(base_rect.position + ghost.replay_position, base_rect.size)
+		if not my_rect.intersects(now_rect) and not my_rect.intersects(next_rect):
+			remove_collision_exception_with(ghost)
+			_passthrough_ghosts.erase(ghost)
