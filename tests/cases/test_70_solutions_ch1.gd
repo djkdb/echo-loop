@@ -3,4 +3,4 @@ extends "res://tests/solution_case.gd"
 
 
 func stages() -> Array[String]:
-	return ["level_1_1", "level_1_2", "level_1_3"]
+	return ["level_1_1", "level_1_2", "level_1_3", "level_1_4"]
