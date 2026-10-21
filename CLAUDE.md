@@ -58,6 +58,7 @@ res://
 ```
 
 씬과 그 스크립트는 같은 폴더에 같은 이름으로 둔다.
+스크립트 옆에 생기는 `.uid` 파일은 지우지 말고 같이 커밋한다.
 
 ## 입력 액션 (project.godot에 등록된 이름 그대로 사용)
 
@@ -65,6 +66,9 @@ res://
 `select_ghost_1` ~ `select_ghost_4` `reels_mode`
 
 입력 맵에 없는 액션이 필요하면 직접 추가하지 말고 나에게 이름과 키를 알려줄 것.
+
+R과 Shift+R이 겹치므로 `end_loop`는 반드시 exact match로 검사한다
+(`Input.is_action_just_pressed("end_loop", true)`, 이벤트면 `event.is_action_pressed("end_loop", false, true)`).
 
 ## 코딩 컨벤션
 
