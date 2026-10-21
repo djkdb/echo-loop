@@ -7,6 +7,7 @@
 [ext_resource type="Script" uid="uid://c55v4u3hrn3be" path="res://game/main.gd" id="5_main"]
 [ext_resource type="PackedScene" uid="uid://wr1uvoogxsnw" path="res://levels/level_1_2.tscn" id="6_level"]
 [ext_resource type="Script" uid="uid://cyc4887jayxeb" path="res://game/fx.gd" id="7_fx"]
+[ext_resource type="Script" uid="uid://dniyiogner3fw" path="res://game/reels_mode.gd" id="8_reels"]
 
 [node name="Main" type="Node2D"]
 script = ExtResource("5_main")
@@ -36,3 +37,9 @@ position = Vector2(360, 640)
 script = ExtResource("7_fx")
 loop_manager = NodePath("../LoopManager")
 camera = NodePath("../Camera")
+
+[node name="ReelsMode" type="Node" parent="." node_paths=PackedStringArray("loop_manager", "camera", "hud")]
+script = ExtResource("8_reels")
+loop_manager = NodePath("../LoopManager")
+camera = NodePath("../Camera")
+hud = NodePath("../HUD")
