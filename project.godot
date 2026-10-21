@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="Echo Loop"
-run/main_scene="uid://dpqv1gyde8368"
+run/main_scene="uid://dt2tbl1li8gg6"
 config/features=PackedStringArray("4.7", "GL Compatibility")
 
 [autoload]
