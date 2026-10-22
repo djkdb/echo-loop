@@ -49,7 +49,8 @@ func run_case() -> void:
 		else: steer_to(26.0), 200)
 	var g: Ghost = lm.ghosts()[0]
 	var leave: int = first_frame(g.frames().slice(60), func(p: Vector2) -> bool: return p.x + 20.0 <= 50.0) + 60
-	var l2: Array = await run_loop(Callable(), 220)
+	# 나는 판·문과 떨어진 곳(x 160)에 비켜 선다. 스폰에 서 있으면 돌아오는 고스트가 벽으로 밀어붙여 짓눌림(루프 실패)이 된다.
+	var l2: Array = await run_loop(func(t: int) -> void: steer_to(160.0), 220)
 	var close_t: int = -1
 	for e: Array in l2:
 		if e[1] > leave and not e[2][1]:

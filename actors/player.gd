@@ -40,6 +40,14 @@ var _was_on_floor: bool = false
 var _fx_jump: bool = false
 var _fx_land: bool = false
 
+## 짓눌림 판정: 몸을 가로 8·세로 17px 줄인 사각형이 지형·고스트와 겹치면 짓눌린 것(내려앉는 고스트에 깔리거나
+## 벽 속으로 밀려남)으로 보고 루프를 실패시킨다. 올라탄 고스트·발판이 위로 움직일 때 생기는 1틱 지연 파고듦은
+## 최대 15px이라 세로 17px 안쪽까지는 닿지 않는다.
+const CRUSH_INSET: Vector2 = Vector2(8, 17)
+var _crush_query: PhysicsShapeQueryParameters2D
+## 리셋 직후 2프레임은 고스트가 아직 이전 위치에 있을 수 있어 판정하지 않는다.
+var _reset_frame: int = -100
+
 
 func _ready() -> void:
 	add_to_group("resettable")
@@ -69,6 +77,8 @@ func _physics_process(delta: float) -> void:
 	if is_on_floor() and not _was_on_floor:
 		landed.emit()
 	_was_on_floor = is_on_floor()
+	if _is_crushed():
+		get_tree().call_group("loop_manager", "fail_loop")
 
 	# 상호작용은 "누른 순간"만 남긴다. 누르고 있는 동안 계속 true면 고스트가 레버를 매 틱 다시 당기게 된다.
 	var interacted: bool = Input.is_action_just_pressed("interact")
@@ -119,6 +129,29 @@ func reset() -> void:
 		global_position = spawn_point.global_position
 	_refresh_contact_state()
 	_was_on_floor = is_on_floor()
+	_reset_frame = Engine.get_physics_frames()
+
+
+func _is_crushed() -> bool:
+	if Engine.get_physics_frames() - _reset_frame < 2:
+		return false
+	if _crush_query == null:
+		_crush_query = PhysicsShapeQueryParameters2D.new()
+		var inner := RectangleShape2D.new()
+		inner.size = (_shape.shape as RectangleShape2D).size - CRUSH_INSET * 2.0
+		_crush_query.shape = inner
+		# 지형 + 고스트 + 파랑 문(지금의 나를 막는 것들)
+		_crush_query.collision_mask = collision_mask
+	_crush_query.transform = Transform2D(0.0, global_position + _shape.position)
+	var exclude: Array[RID] = [get_rid()]
+	for body: Node in get_collision_exceptions():
+		exclude.append((body as CollisionObject2D).get_rid())
+	_crush_query.exclude = exclude
+	for hit: Dictionary in get_world_2d().direct_space_state.intersect_shape(_crush_query, 4):
+		# 상자는 옆면이 위치 규칙으로 밀리는 물체라 겹쳐도 짓눌림이 아니다(BACKLOG 상자 항목).
+		if not hit["collider"] is Box:
+			return true
+	return false
 
 
 ## 겹쳐 있는 레버·시한 버튼을 당긴다. 고스트도 녹화된 interact 틱에 같은 방식으로 부른다.
