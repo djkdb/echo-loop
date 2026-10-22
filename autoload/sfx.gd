@@ -11,6 +11,9 @@ const VOICES: int = 8
 
 var streams: Dictionary = {}
 
+## 웹 브라우저는 사용자 입력 전 소리를 막는다. 첫 터치·클릭·키 입력 전에 낸 소리는 버리고 그 뒤부터 낸다
+## (막힌 동안 쌓였다가 한꺼번에 터지지 않게). 데스크톱은 처음부터 켜져 있다.
+var unlocked: bool = not OS.has_feature("web")
 var _players: Array[AudioStreamPlayer] = []
 var _next: int = 0
 var _rng := RandomNumberGenerator.new()
@@ -36,7 +39,14 @@ func _ready() -> void:
 	}
 
 
+func _input(event: InputEvent) -> void:
+	if not unlocked and (event is InputEventScreenTouch or event is InputEventMouseButton or event is InputEventKey) and event.is_pressed():
+		unlocked = true
+
+
 func play(sound: String, volume_db: float = 0.0, pitch: float = 1.0) -> void:
+	if not unlocked:
+		return
 	if not streams.has(sound):
 		push_warning("Sfx: 없는 소리 %s" % sound)
 		return

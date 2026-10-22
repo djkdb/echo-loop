@@ -4,7 +4,7 @@ extends Control
 ## 상태를 읽어 그리기만 하므로 _process(연출)에서 갱신한다.
 
 const RADIUS: float = 12.0
-const GAP: float = 34.0
+const GAP: float = 46.0
 
 var loop_manager: LoopManager
 

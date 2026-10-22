@@ -53,6 +53,12 @@ func _ready() -> void:
 		y += 40.0
 	_add_label("모바일: 아래 버튼으로 이동·점프·E, 위 고스트 아이콘을 탭해 다시 찍기", Rect2(0, y + 10, 720, 36), 21, Color(Palette.SUB_TEXT, 0.7))
 	_prompt = _add_label("ENTER / TAP", Rect2(0, 1170, 720, 60), 40, Palette.EXIT)
+	# 웹·터치: 시작 전에 전체 화면을 고를 수 있게(누르면 시작하지 않고 전체 화면만)
+	var fs := FullscreenButton.new()
+	fs.name = "Fullscreen"
+	fs.size = Vector2(220, 56)
+	fs.position = Vector2(480, 40)
+	add_child(fs)
 
 
 func _gui_input(event: InputEvent) -> void:
