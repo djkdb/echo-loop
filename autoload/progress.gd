@@ -8,6 +8,8 @@ const DEFAULT_PATH: String = "user://progress.json"
 var path: String = DEFAULT_PATH
 ## stage_id -> 그 스테이지를 CLEAR한 최소 고스트 수.
 var best: Dictionary = {}
+## 한 번만 보여 줄 안내 등 작은 표시(이름 -> true).
+var flags: Dictionary = {}
 ## 스테이지 선택 화면이 고른 스테이지. Main이 _ready에서 읽고, 비어 있으면 자기 level_scene을 쓴다.
 var pending_stage: String = ""
 
@@ -60,11 +62,22 @@ func save_file() -> void:
 	if file == null:
 		push_warning("기록을 저장하지 못했다: %s" % path)
 		return
-	file.store_string(JSON.stringify({"version": 1, "best": best}, "\t"))
+	file.store_string(JSON.stringify({"version": 1, "best": best, "flags": flags}, "\t"))
+
+
+func has_flag(name: String) -> bool:
+	return flags.get(name, false)
+
+
+func set_flag(name: String) -> void:
+	if not has_flag(name):
+		flags[name] = true
+		save_file()
 
 
 func load_file() -> void:
 	best = {}
+	flags = {}
 	var file := FileAccess.open(path, FileAccess.READ)
 	if file == null:
 		return
@@ -72,3 +85,5 @@ func load_file() -> void:
 	if doc is Dictionary and (doc as Dictionary).get("best") is Dictionary:
 		for k: String in doc["best"]:
 			best[k] = int(doc["best"][k])
+		if doc.get("flags") is Dictionary:
+			flags = (doc["flags"] as Dictionary).duplicate()

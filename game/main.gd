@@ -65,6 +65,7 @@ func load_level(scene: PackedScene) -> void:
 		_loop_manager.stage_cleared.connect(_save_replay)
 		_loop_manager.stage_cleared.connect(_record_clear)
 	_hud.stage_id = stage_id()
+	_hud.hints.stage_id = stage_id()
 	# 레벨이 붙은 뒤에 시작해야 Player가 이 레벨의 SpawnPoint에서, 이 레벨의 루프 설정으로 시작한다.
 	_loop_manager.start_level(level)
 

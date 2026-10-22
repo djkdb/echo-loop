@@ -25,6 +25,7 @@ var _last_tick_second: int = -1
 @onready var _timeline: Timeline = $Timeline
 @onready var _hint_label: Label = $ClearPanel/HintLabel
 
+var hints: Hints
 var _clear_stars: StarIcons
 var _clear_record: Label
 var _clear_shown: bool = false
@@ -51,6 +52,11 @@ func _ready() -> void:
 	_clear_panel.add_child(_clear_record)
 	_hint_label.offset_top = 175.0
 	_hint_label.offset_bottom = 225.0
+	# 첫 플레이 안내(릴스 텍스트 자리). HUD 안이라 릴스 모드에서 함께 숨는다.
+	hints = Hints.new()
+	hints.name = "Hints"
+	hints.loop_manager = loop_manager
+	add_child(hints)
 	# 모바일 터치 버튼(터치 화면에서만 보인다). HUD 안이라 릴스 모드에서 HUD와 함께 숨는다.
 	var touch := TouchControls.new()
 	touch.name = "TouchControls"

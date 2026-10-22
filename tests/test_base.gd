@@ -49,6 +49,7 @@ func start() -> void:
 	release_all()
 	Progress.path = TEST_PROGRESS_PATH
 	Progress.best = {}
+	Progress.flags = {}
 	Progress.pending_stage = ""
 	main = load("res://game/main.tscn").instantiate()
 	main.level_scene = load(test_level())
