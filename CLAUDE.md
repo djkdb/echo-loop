@@ -48,6 +48,8 @@
     그 고스트는 점프 발판이 아니다(`Ghost.supports_jump`, 코요테도 채우지 않음). Player는 플랫폼 속도를 물려받지 않는다
     (`platform_on_leave = DO_NOTHING`). 둘 다 없으면 고스트 점프에 올라타 뛰는 부스트(실측 352~693px)로
     고스트 1명이 탑 2단보다 높이 닿아 높이 퍼즐이 성립하지 않는다.
+14. **짓눌린 Player = 루프 실패.** 이동 뒤 몸을 가로 8·세로 17px 줄인 사각형이 지형·고스트와 겹치면(내려앉는 고스트에 깔림,
+    고스트가 벽 쪽으로 밀어붙임) `fail_loop()`. 올라탄 고스트의 1틱 파고듦(최대 15px)·상자·스폰 통과 중인 고스트는 제외.
 
 ## 처리 순서 (process_physics_priority, 작을수록 먼저)
 
@@ -93,12 +95,14 @@ res://
 ├─ levels/      level.gd, level_<챕터>_<번호>.tscn(15개), level_test*.tscn, stages.gd(스테이지 목록·별점 규칙),
 │               room_style.gd·signal_wires.gd(레벨이 런타임에 붙이는 그림)
 ├─ ui/          title.tscn/.gd(타이틀), stage_select.tscn/.gd(+ stage_card.gd), hud.tscn/.gd,
-│               ghost_slots.gd·timeline.gd·star_icons.gd·touch_controls.gd(HUD·화면 안 조각)
-├─ autoload/    replay_io.gd(ReplayIO), sfx.gd(Sfx), progress.gd(Progress: 클리어 기록 user://progress.json)
+│               ghost_slots.gd·timeline.gd·star_icons.gd·touch_controls.gd·hints.gd·fullscreen_button.gd(HUD·화면 안 조각)
+├─ autoload/    replay_io.gd(ReplayIO), sfx.gd(Sfx), progress.gd(Progress: 클리어 기록·플래그 user://progress.json),
+│               playtest.gd(Playtest: 플레이 테스트 기록 user://playtest.json)
 ├─ assets/      fonts/ (Noto Sans KR 서브셋 = 기본, Space Grotesk 700 + 한글 폴백 = hud_font.tres, 모두 OFL)
 │               fx/ (glow_texture·additive = 가산 글로우, rewind·glitch 셰이더)
 ├─ solutions/   <stage>.json (개발자 정답 리플레이 = 별 3개 기준, 내보내기에서 제외)
-├─ tools/       subset_font.py (한글 폰트 서브셋, 내보내기에서 제외)
+├─ tools/       subset_font.py(한글 폰트 서브셋), playtest_report.py(플레이 테스트 모아 보기),
+│               render_reels.sh + reels_problem.tscn/.gd + reels_copy.json(릴스 렌더) — 내보내기에서 제외
 ├─ docs/        design.pdf(기획서), levels.md(레벨 설계 근거), BACKLOG.md
 └─ tests/       run_all.gd, test_base.gd, cases/test_*.gd (자동 테스트), solution_case.gd(정답 검증 공용),
                 bots/<stage>.gd (정답을 실제로 풀어 solutions/를 만드는 봇) — 모두 내보내기에서 제외
@@ -132,7 +136,15 @@ res://
   별점 = ★1 클리어 / ★2 상한보다 적은 고스트 / ★3 개발자 기록 이하(`Stages.stars_for`). 앞 스테이지를 깨면 다음이 열린다.
   자동 테스트는 `user://test_progress.json`을 쓴다(실제 기록을 건드리지 않음).
 - 모바일 터치: `TouchControls`(HUD 안)가 터치 화면에서만 보인다. 데스크톱 확인은 실행 인자 `--touch`.
-  버튼은 입력 액션을 그대로 누르므로 게임 로직은 키보드와 같은 길이다. 시간 바 0.5초 길게 = `end_loop`.
+  버튼은 입력 액션을 그대로 누르므로 게임 로직은 키보드와 같은 길이다. 시간 바 0.5초 길게 = `end_loop`,
+  오른쪽 위 ⟲ `restart_stage`·↶ `undo_ghost`·≡ `ui_cancel`. 터치 영역은 지름 44px 이상, 방(y 300~1030)을 가리지 않는다(test_82).
+  웹에서는 첫 터치 뒤 전체 화면 제안, 브라우저 스크롤·핀치·더블탭 줌 막기(export 프리셋 head_include), 첫 입력 뒤에 소리 시작.
+- 첫 플레이 안내(`Hints`, HUD 안 y 240~300): 1-1~1-3만, 그 스테이지를 깨면 다시 안 띄움. 입력 없는 시간 초과 2번 연속이면
+  "언제든 루프를 끝낼 수 있다"를 한 번(Progress 플래그). 릴스 모드·리플레이 렌더에는 나오지 않는다.
+- 플레이 테스트 기록(`Playtest`): 스테이지별 시도 루프 수·되돌리기·처음부터·처음 클리어까지 실제 시간·고스트·별을
+  `user://playtest.json`에 저장(전송 없음). 타이틀 "테스트 결과 복사" = 요약 + JSON을 클립보드로. `tools/playtest_report.py`로 모아 본다.
+- 릴스 렌더: `tools/render_reels.sh <stage|all>` → `build/reels/<stage>_{answer,answer_2x,problem}.mp4`(1080x1920).
+  정답편 = 리플레이 `--solution --reels --trim --seamless --text=…`, 문제편 = `tools/reels_problem.tscn`. 문구는 `tools/reels_copy.json`.
 - 웹 빌드: `godot --headless --path . --export-release "Web" build/web/index.html`
   (export_presets.cfg "Web": 스레드 끔, 제외 `tests/* solutions/* tools/* docs/* build/*`. 4.7.2 web_nothreads 템플릿 필요.
   `build/`는 git에 넣지 않는다. itch.io에는 build/web 폴더를 zip으로 올리고 "This file will be played in the browser").
@@ -165,12 +177,13 @@ res://
 ## 입력 액션 (project.godot에 등록된 이름 그대로 사용)
 
 `move_left` `move_right` `jump` `interact` `end_loop` `undo_ghost` `restart_stage`
-`select_ghost_1` ~ `select_ghost_4` `reels_mode`
+`select_ghost_1` ~ `select_ghost_4` `reels_mode` `debug_collapse`
 
 입력 맵에 없는 액션이 필요하면 직접 추가하지 말고 나에게 이름과 키를 알려줄 것.
 
 - `undo_ghost`(Backspace): 마지막 고스트 삭제, 루프 번호 -1, 지금 루프를 처음부터.
 - `select_ghost_n`(1~4): 그 번호 고스트를 빼고(benched) 루프를 처음부터. 이번 녹화로 덮어쓴다. 같은 번호를 다시 누르면 취소.
+- `debug_collapse`(F10): 디버그 빌드에서만, 가장 최근 고스트를 강제 붕괴(릴스 촬영용).
 
 R과 Shift+R이 겹치므로 `end_loop`는 반드시 exact match로 검사한다
 (`Input.is_action_just_pressed("end_loop", true)`, 이벤트면 `event.is_action_pressed("end_loop", false, true)`).
@@ -199,21 +212,18 @@ R과 Shift+R이 겹치므로 `end_loop`는 반드시 exact match로 검사한다
 
 ---
 
-## 현재 마일스톤: MVP 완성(phase-c, v0.1.0) → 플레이 테스트·릴스
+## 현재 마일스톤: 플레이 테스트(phase-d, v0.2.0)
 
 완료
-- [x] 1주차 프로토타입: Player·LoopManager·Ghost·압력판+문·1-2 "문지기"·HUD
-- [x] 오브젝트: 레버, 시한 버튼, 이동 발판, 레이저, 색 문, 상자, 반전 문(inverted)
-- [x] 고스트 편의: 되돌리기(Backspace), 개별 재녹화(1~4), 고스트 슬롯, 루프 타임라인
-- [x] 비주얼 "NEON LOOP", 연출(되감기·글리치·똑딱·CLEAR 경로), 리플레이·릴스 모드, 효과음
-- [x] 스케일: 레벨 기하를 작게 + 카메라 줌(챕터 1 = 2.0, 이후 1.5), 화면 좌표 기준 레벨 배치 규칙
-- [x] 스테이지 15개(3챕터) + 개발자 정답 리플레이(solutions/)와 검증 테스트, 설계 근거 docs/levels.md
-- [x] 스테이지 선택 화면, 별점, 클리어 기록 저장, 타이틀 화면
-- [x] 모바일 터치 조작, 웹 빌드(build/web), 폰트 서브셋
+- [x] MVP(phase-c, v0.1.0): 오브젝트 8종, 스테이지 15개 + 정답 리플레이, 선택 화면·별점·저장, 타이틀, 터치, 웹 빌드
+- [x] 첫 플레이 안내(1-1~1-3, 입력 없는 시간 초과), 모바일 마무리(되돌리기·처음부터, 웹 전체 화면·줌 막기·오디오)
+- [x] 짓눌린 Player = 루프 실패
+- [x] 플레이 테스트 기록·결과 복사·모아 보기(tools/playtest_report.py)
+- [x] 릴스 도구: F10 강제 붕괴, tools/render_reels.sh(정답편·2배속·문제편)
 
-다음 후보(정해지면 한 단계씩)
-- [ ] 친구 플레이 테스트(5분 안에 풀면 적정, 10분 넘게 막히면 힌트 문구·배치 수정) → docs/levels.md 갱신
-- [ ] itch.io 업로드(사람이 한다), 릴스 촬영(리플레이 `--solution`으로 정답편)
-- [ ] 클리어 리플레이 2배속, 첫 스테이지 안내 문구, 모바일 되돌리기·처음부터 버튼 — docs/BACKLOG.md
+다음(플레이 테스트 결과를 보고 결정, 레벨 배치·퍼즐 수치는 그때 바꾼다)
+- [ ] 친구 플레이 테스트 → playtest_report 표 → 5분 넘는 스테이지 힌트·배치 수정, docs/levels.md 갱신
+- [ ] itch.io 업로드(사람이 한다), 릴스 시리즈 업로드
+- [ ] BACKLOG의 열린 항목(★2 구간, 2-1 발판 대기, 클리어 리플레이 게임 안 2배속 등)
 
 미뤄 둔 결정·알려진 한계는 docs/BACKLOG.md.
