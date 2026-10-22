@@ -4,7 +4,7 @@
     python3 tools/subset_font.py <원본 NotoSansKR-Bold.otf> assets/fonts/NotoSansKR-Bold.otf
 
 남기는 글자: ASCII·라틴-1, 문장부호·화살표·도형·★ 같은 기호, 한글 자모, KS X 1001 상용 한글 2,350자,
-그리고 프로젝트 스크립트·씬에 실제로 쓰인 모든 글자(상용 밖의 한글이 들어가도 빠지지 않게).
+그리고 프로젝트 스크립트·씬·릴스 문구(tools/reels_copy.json)에 실제로 쓰인 모든 글자(상용 밖의 한글이 들어가도 빠지지 않게).
 새 문구에 상용 밖 글자를 쓰면 이 스크립트를 다시 돌린다(원본은 Google Fonts의 Noto Sans KR).
 """
 import os
@@ -32,7 +32,7 @@ def wanted_codepoints() -> set:
         if "/.godot" in base or "/.git" in base or "/build" in base:
             continue
         for f in files:
-            if f.endswith((".gd", ".tscn", ".tres", ".cfg")):
+            if f.endswith((".gd", ".tscn", ".tres", ".cfg")) or f == "reels_copy.json":
                 with open(os.path.join(base, f), encoding="utf-8", errors="ignore") as fh:
                     cps |= {ord(c) for c in fh.read() if ord(c) > 0x7F}
     return cps

@@ -63,6 +63,9 @@ func _physics_process(_delta: float) -> void:
 		if Input.is_action_just_pressed("select_ghost_%d" % n):
 			select_ghost(n)
 			return
+	# 촬영용(디버그 빌드에서만): F10으로 가장 최근 고스트를 강제 붕괴시켜 글리치 장면을 찍는다.
+	if OS.is_debug_build() and Input.is_action_just_pressed("debug_collapse"):
+		debug_collapse_latest()
 	if _fail_pending:
 		_fail_pending = false
 		loop_failed.emit()
@@ -143,6 +146,14 @@ func clear_stage() -> void:
 		return
 	cleared = true
 	stage_cleared.emit()
+
+
+## 가장 최근(번호가 큰) 살아 있는 고스트를 붕괴시킨다(릴스 촬영용 debug_collapse).
+func debug_collapse_latest() -> void:
+	for i in range(_ghosts.size() - 1, -1, -1):
+		if _ghosts[i].alive:
+			_ghosts[i].collapse()
+			return
 
 
 func ghost_count() -> int:

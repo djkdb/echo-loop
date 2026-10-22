@@ -43,10 +43,6 @@
 - **itch.io 업로드는 사람이 한다**: `build/web` 폴더를 zip → itch.io "HTML" 프로젝트 → "This file will be played in the browser",
   뷰포트 720×1280(또는 360×640) 세로. 스레드를 끈 빌드라 SharedArrayBuffer 설정은 필요 없다.
 
-## 촬영
-
-- **붕괴 장면 촬영용 디버그 키**(고스트 강제 붕괴 등): 릴스 촬영 시점에 검토. 입력 액션이 새로 필요하다.
-
 ---
 
 ## 해결된 항목 (기록)
@@ -61,5 +57,6 @@
 - 공중의 고스트가 내려앉으며 Player를 짓누름(벽 속으로 밀려남) → 짓눌린 Player = 루프 실패(phase-d D3).
   몸을 가로 8·세로 17px 줄인 사각형이 지형·고스트와 겹치면 짓눌림(올라탄 고스트의 1틱 파고듦 15px은 제외, 상자 제외).
   고스트가 벽 쪽으로 걸어와 Player를 밀어붙이는 것도 짓눌림이다.
+- 붕괴 장면 촬영용 디버그 키 → `debug_collapse`(F10, 디버그 빌드에서만): 가장 최근 고스트 강제 붕괴(phase-d D5).
 - 폰트 서브셋 4.8MB → 358KB(`tools/subset_font.py`, phase-c C5).
 - 자동 테스트 저장소 안으로(`tests/run_all.gd`), 웹 내보내기에서 `tests/* solutions/* tools/* docs/* build/*` 제외(C5).

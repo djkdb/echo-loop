@@ -9,6 +9,8 @@ extends Node
 const ROOM_TARGET: Rect2 = RoomCamera.REELS_TARGET
 ## 상단 텍스트 슬롯(릴스 텍스트 자리).
 const TEXT_SLOT: Rect2 = Rect2(0, 240, 720, 60)
+const MAX_FONT_SIZE: int = 50
+const MIN_FONT_SIZE: int = 26
 
 ## 상단 문구. 비우면 "10초 전의 나 × n"(n = 고스트 수 + 1)을 자동으로 쓴다.
 @export var text: String = ""
@@ -34,7 +36,7 @@ func _ready() -> void:
 	_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	_label.autowrap_mode = TextServer.AUTOWRAP_OFF
 	_label.add_theme_font_override("font", load("res://assets/fonts/hud_font.tres"))
-	_label.add_theme_font_size_override("font_size", 50)
+	_label.add_theme_font_size_override("font_size", MAX_FONT_SIZE)
 	_label.add_theme_color_override("font_color", Palette.ME)
 	_label.add_theme_color_override("font_outline_color", Palette.BG)
 	_label.add_theme_constant_override("outline_size", 12)
@@ -49,6 +51,8 @@ func _unhandled_input(event: InputEvent) -> void:
 func set_active(on: bool) -> void:
 	active = on
 	_layer.visible = on
+	# 켜는 순간부터 문구가 보이게(이 노드가 멈춰 있는 렌더 장면에서도)
+	_set_text(text if text != "" else _auto_text())
 	if hud != null:
 		hud.visible = not on
 	_apply_camera()
@@ -57,8 +61,20 @@ func set_active(on: bool) -> void:
 func _process(_delta: float) -> void:
 	if not active:
 		return
-	_label.text = text if text != "" else _auto_text()
+	_set_text(text if text != "" else _auto_text())
 	_apply_camera()
+
+
+## 문구가 한 줄에 다 들어가도록 글자 크기를 줄인다(최대 50, 최소 26).
+func _set_text(t: String) -> void:
+	if _label.text == t:
+		return
+	_label.text = t
+	var font: Font = _label.get_theme_font("font")
+	var fs: int = MAX_FONT_SIZE
+	while fs > MIN_FONT_SIZE and font.get_string_size(t, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x > TEXT_SLOT.size.x - 32.0:
+		fs -= 2
+	_label.add_theme_font_size_override("font_size", fs)
 
 
 func _auto_text() -> String:

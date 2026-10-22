@@ -6,11 +6,20 @@ extends Node2D
 ##   godot --path . --write-movie replay.avi --fixed-fps 60 res://game/replay.tscn -- --stage=level_1_2 --loops=1 --reels
 ##   --stage=<id>  리플레이 이름(기본 stage_id)   --loops=<n>  n번 재생하고 종료(0 = 무한)   --reels  릴스 모드로
 ##   --solution  user://replays 대신 개발자 정답(solutions/<id>.json)을 재생(릴스 "정답편")
+##   --text=<문구>  릴스 모드 상단 문구   --trim  마지막 루프(지금의 나)가 끝나고 0.75초 뒤에 루프를 끝낸다
+##   --seamless  마지막 재생이 끝나면 처음 장면으로 되돌린 프레임을 찍고 끝낸다(영상 끝이 처음과 이어짐)
 
 @export var stage_id: String = "level_1_2"
 @export var loops: int = 0
 @export var reels: bool = false
 @export var solution: bool = false
+@export var text: String = ""
+@export var trim: bool = false
+@export var seamless: bool = false
+
+## --trim: 마지막 녹화가 끝난 뒤 이만큼 더 보여 주고 루프를 끝낸다.
+const TRIM_TAIL_TICKS: int = 45
+var _quit_in: int = -1
 @export var ghost_scene: PackedScene
 
 var level: Level
@@ -33,6 +42,12 @@ func _ready() -> void:
 			reels = true
 		elif arg == "--solution":
 			solution = true
+		elif arg.begins_with("--text="):
+			text = arg.trim_prefix("--text=")
+		elif arg == "--trim":
+			trim = true
+		elif arg == "--seamless":
+			seamless = true
 	process_physics_priority = 100
 	var doc: Dictionary = ReplayIO.load_solution(stage_id) if solution else ReplayIO.load_run(stage_id)
 	if doc.is_empty():
@@ -49,6 +64,8 @@ func start(doc: Dictionary) -> void:
 		level.exit.process_mode = Node.PROCESS_MODE_DISABLED
 	loop_ticks = int(float(doc["loop_seconds"]) * Engine.physics_ticks_per_second)
 	var runs: Array = doc["runs"]
+	if trim and not runs.is_empty():
+		loop_ticks = mini(loop_ticks, (runs[-1] as Array).size() + TRIM_TAIL_TICKS)
 	for i in runs.size():
 		var g: Ghost = ghost_scene.instantiate() as Ghost
 		g.me_style = i == runs.size() - 1
@@ -57,7 +74,7 @@ func start(doc: Dictionary) -> void:
 		ghosts.append(g)
 	var reels_node: ReelsMode = get_node_or_null("ReelsMode")
 	if reels_node != null:
-		reels_node.text = "%d초 전의 나 × %d" % [roundi(float(doc["loop_seconds"])), runs.size()]
+		reels_node.text = text if text != "" else "%d초 전의 나 × %d" % [roundi(float(doc["loop_seconds"])), runs.size()]
 		reels_node.set_active(reels)
 	get_tree().call_group("resettable", "reset")
 
@@ -65,11 +82,21 @@ func start(doc: Dictionary) -> void:
 func _physics_process(_delta: float) -> void:
 	if level == null:
 		return
+	if _quit_in >= 0:
+		_quit_in -= 1
+		if _quit_in < 0:
+			get_tree().quit()
+		return
 	tick += 1
 	if tick >= loop_ticks:
 		tick = 0
 		played += 1
 		if loops > 0 and played >= loops:
-			get_tree().quit()
+			if seamless:
+				# 처음 장면으로 돌려 놓고 두 프레임 더 찍은 뒤 끝낸다
+				get_tree().call_group("resettable", "reset")
+				_quit_in = 2
+			else:
+				get_tree().quit()
 			return
 		get_tree().call_group("resettable", "reset")

@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://cvlng4nrq8fdm"]
+
+[ext_resource type="Script" uid="uid://bnofu5nxeyi86" path="res://tools/reels_problem.gd" id="1_problem"]
+
+[node name="ReelsProblem" type="Node"]
+script = ExtResource("1_problem")
