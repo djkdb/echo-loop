@@ -51,6 +51,8 @@ func start() -> void:
 	Progress.best = {}
 	Progress.flags = {}
 	Progress.pending_stage = ""
+	Playtest.path = "user://test_playtest.json"
+	Playtest.stages = {}
 	main = load("res://game/main.tscn").instantiate()
 	main.level_scene = load(test_level())
 	add_child(main)

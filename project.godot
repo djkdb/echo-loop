@@ -19,6 +19,7 @@ config/features=PackedStringArray("4.7", "GL Compatibility")
 ReplayIO="*res://autoload/replay_io.gd"
 Sfx="*res://autoload/sfx.gd"
 Progress="*res://autoload/progress.gd"
+Playtest="*res://autoload/playtest.gd"
 
 [display]
 

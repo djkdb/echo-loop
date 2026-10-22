@@ -17,6 +17,8 @@ signal stage_cleared
 signal loop_failed
 ## 되돌리기·덮어쓰기 선택으로 고스트 구성이 바뀌고 루프를 처음부터 할 때(리셋 직전).
 signal ghosts_changed
+## 되돌리기(마지막 고스트 삭제)를 했을 때. ghosts_changed보다 먼저 나온다(플레이 테스트 기록용).
+signal ghost_undone
 
 @export var player: Player
 @export var ghosts_root: Node2D
@@ -92,6 +94,7 @@ func undo_ghost() -> void:
 	ghosts_root.remove_child(ghost)
 	ghost.queue_free()
 	loop_index = maxi(loop_index - 1, 1)
+	ghost_undone.emit()
 	ghosts_changed.emit()
 	_reset_all()
 

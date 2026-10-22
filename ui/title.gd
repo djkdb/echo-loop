@@ -25,6 +25,9 @@ var _font: Font = preload("res://assets/fonts/hud_font.tres")
 var _time: float = 0.0
 var _runners: Array[CharacterVisual] = []
 var _prompt: Label
+var copy_button: Button
+var _copied: Label
+var _copied_left: float = 0.0
 
 
 func _ready() -> void:
@@ -53,6 +56,22 @@ func _ready() -> void:
 		y += 40.0
 	_add_label("모바일: 아래 버튼으로 이동·점프·E, 위 고스트 아이콘을 탭해 다시 찍기", Rect2(0, y + 10, 720, 36), 21, Color(Palette.SUB_TEXT, 0.7))
 	_prompt = _add_label("ENTER / TAP", Rect2(0, 1170, 720, 60), 40, Palette.EXIT)
+	# 플레이 테스트 결과 복사(친구가 카톡으로 붙여 보내는 용도). 누르면 시작하지 않고 클립보드에만 담는다.
+	copy_button = Button.new()
+	copy_button.name = "CopyResults"
+	copy_button.text = "테스트 결과 복사"
+	copy_button.flat = true
+	copy_button.focus_mode = Control.FOCUS_NONE
+	copy_button.position = Vector2(16, 1234)
+	copy_button.size = Vector2(230, 40)
+	copy_button.add_theme_font_override("font", _font)
+	copy_button.add_theme_font_size_override("font_size", 22)
+	copy_button.add_theme_color_override("font_color", Color(Palette.SUB_TEXT, 0.8))
+	copy_button.add_theme_color_override("font_hover_color", Palette.ME)
+	copy_button.pressed.connect(copy_results)
+	add_child(copy_button)
+	_copied = _add_label("", Rect2(250, 1234, 300, 40), 22, Palette.EXIT)
+	_copied.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 	# 웹·터치: 시작 전에 전체 화면을 고를 수 있게(누르면 시작하지 않고 전체 화면만)
 	var fs := FullscreenButton.new()
 	fs.name = "Fullscreen"
@@ -73,6 +92,13 @@ func _unhandled_input(event: InputEvent) -> void:
 		start()
 
 
+## 플레이 테스트 요약 + JSON을 클립보드로.
+func copy_results() -> void:
+	DisplayServer.clipboard_set(Playtest.report_text())
+	_copied.text = "복사했어요. 카톡에 붙여 보내 주세요"
+	_copied_left = 3.0
+
+
 func start() -> void:
 	get_tree().change_scene_to_file(SELECT_SCENE)
 
@@ -86,6 +112,8 @@ func _process(delta: float) -> void:
 		_runners[i].position = Vector2(x, RUN_Y - _hop(t))
 		_runners[i].scale.x = -1.5 if facing_left else 1.5
 	_prompt.modulate.a = 0.55 + 0.45 * sin(_time * 3.0)
+	_copied_left = maxf(_copied_left - delta, 0.0)
+	_copied.visible = _copied_left > 0.0
 	queue_redraw()
 
 
