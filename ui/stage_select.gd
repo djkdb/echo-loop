@@ -56,6 +56,11 @@ func _ready() -> void:
 	_info_element = _add_label("", Rect2(0, 1104, 720, 40), 28, Palette.SUB_TEXT)
 	_info_record = _add_label("", Rect2(0, 1146, 720, 40), 26, Palette.EXIT)
 	_add_label("방향키 선택 · Enter/E 시작 · Esc 타이틀", Rect2(0, 1214, 720, 36), 22, Color(Palette.SUB_TEXT, 0.7))
+	var sound := SoundToggle.new()
+	sound.name = "SoundToggle"
+	sound.position = Vector2(554, 16)
+	sound.size = Vector2(150, 52)
+	add_child(sound)
 	refresh()
 	_focus_default()
 

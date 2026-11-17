@@ -72,6 +72,11 @@ func _ready() -> void:
 	add_child(copy_button)
 	_copied = _add_label("", Rect2(250, 1234, 300, 40), 22, Palette.EXIT)
 	_copied.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+	var sound := SoundToggle.new()
+	sound.name = "SoundToggle"
+	sound.position = Vector2(16, 40)
+	sound.size = Vector2(150, 52)
+	add_child(sound)
 	# 웹·터치: 시작 전에 전체 화면을 고를 수 있게(누르면 시작하지 않고 전체 화면만)
 	var fs := FullscreenButton.new()
 	fs.name = "Fullscreen"

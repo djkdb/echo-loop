@@ -95,7 +95,7 @@ res://
 ├─ levels/      level.gd, level_<챕터>_<번호>.tscn(15개), level_test*.tscn, stages.gd(스테이지 목록·별점 규칙),
 │               room_style.gd·signal_wires.gd(레벨이 런타임에 붙이는 그림)
 ├─ ui/          title.tscn/.gd(타이틀), stage_select.tscn/.gd(+ stage_card.gd), hud.tscn/.gd,
-│               ghost_slots.gd·timeline.gd·star_icons.gd·touch_controls.gd·hints.gd·fullscreen_button.gd(HUD·화면 안 조각)
+│               ghost_slots.gd·timeline.gd·star_icons.gd·touch_controls.gd·hints.gd·fullscreen_button.gd·sound_toggle.gd(화면 안 조각)
 ├─ autoload/    replay_io.gd(ReplayIO), sfx.gd(Sfx), progress.gd(Progress: 클리어 기록·플래그 user://progress.json),
 │               playtest.gd(Playtest: 플레이 테스트 기록 user://playtest.json)
 ├─ assets/      fonts/ (Noto Sans KR 서브셋 = 기본, Space Grotesk 700 + 한글 폴백 = hud_font.tres, 모두 OFL)
@@ -142,6 +142,7 @@ res://
   버튼은 입력 액션을 그대로 누르므로 게임 로직은 키보드와 같은 길이다. 시간 바 0.5초 길게 = `end_loop`,
   오른쪽 위 ⟲ `restart_stage`·↶ `undo_ghost`·≡ `ui_cancel`. 터치 영역은 지름 44px 이상, 방(y 300~1030)을 가리지 않는다(test_82).
   웹에서는 첫 터치 뒤 전체 화면 제안, 브라우저 스크롤·핀치·더블탭 줌 막기(export 프리셋 head_include), 첫 입력 뒤에 소리 시작.
+- 소리 켬/끔: 타이틀·선택 화면의 `SoundToggle`(마우스·탭)이 SFX 버스를 끄고 Progress 플래그 `sound_off`로 저장한다.
 - 첫 플레이 안내(`Hints`, HUD 안 y 240~300): 1-1~1-3만, 그 스테이지를 깨면 다시 안 띄움. 입력 없는 시간 초과 2번 연속이면
   "언제든 루프를 끝낼 수 있다"를 한 번(Progress 플래그). 릴스 모드·리플레이 렌더에는 나오지 않는다.
 - 플레이 테스트 기록(`Playtest`): 스테이지별 시도 루프 수·되돌리기·처음부터·처음 클리어까지 실제 시간·고스트·별을

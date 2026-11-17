@@ -14,8 +14,28 @@ var flags: Dictionary = {}
 var pending_stage: String = ""
 
 
+const SOUND_OFF_FLAG: String = "sound_off"
+
+
 func _ready() -> void:
 	load_file()
+	apply_sound()
+
+
+## 소리 끔 설정을 SFX 버스에 반영한다(타이틀·선택 화면의 소리 버튼이 바꾼다).
+func apply_sound() -> void:
+	var bus: int = AudioServer.get_bus_index(&"SFX")
+	if bus >= 0:
+		AudioServer.set_bus_mute(bus, has_flag(SOUND_OFF_FLAG))
+
+
+func set_sound_on(on: bool) -> void:
+	if on:
+		flags.erase(SOUND_OFF_FLAG)
+	else:
+		flags[SOUND_OFF_FLAG] = true
+	save_file()
+	apply_sound()
 
 
 ## CLEAR 기록. 이전보다 적은 고스트면 갱신하고 true.
