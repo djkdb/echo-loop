@@ -79,5 +79,5 @@ func run_case() -> void:
 	await frame()
 	check("CLEAR from menu records the ghosts used (1) -> 3 stars", lm.cleared and Progress.best_ghosts("level_1_2") == 1 and Progress.stars("level_1_2") == 3)
 	var stars_node: StarIcons = hud._clear_stars
-	check("CLEAR panel shows the stars and the next-stage hint", stars_node.count == 3 and (hud.get_node("ClearPanel/HintLabel") as Label).text.contains("E 다음"))
+	check("CLEAR panel shows the stars, the next-stage hint and the 2x replay button", stars_node.count == 3 and (hud.get_node("ClearPanel/HintLabel") as Label).text.contains("E 다음") and hud.replay_button.is_visible_in_tree())
 	Progress.pending_stage = ""

@@ -124,7 +124,9 @@ res://
 - 릴스 모드(F9, `ReelsMode`): HUD 숨김, 방 내부를 화면 x 24~612·y 300~1030에 꽉 차게(줌 상한 없음), 릴스 텍스트 자리 y 240~300에 한 줄.
 - 리플레이: CLEAR 때 `user://replays/<stage>.json` 저장, `game/replay.tscn`으로 재생. Movie Maker 렌더:
   `godot --path . --write-movie out.avi --fixed-fps 60 res://game/replay.tscn -- --stage=level_1_2 --loops=1 --reels`
-  (`--solution`을 붙이면 user:// 대신 개발자 정답 `solutions/<stage>.json`을 재생 = 릴스 "정답편")
+  (`--solution`을 붙이면 user:// 대신 개발자 정답 `solutions/<stage>.json`을 재생 = 릴스 "정답편",
+  `--speed=2`는 틱 120 + time_scale 2로 결과가 같은 2배속. 실행 중에 `Engine.physics_ticks_per_second`를 읽지 말고
+  `_ready`에서 한 번 읽어 둘 것: 그래야 배속에서도 틱당 동작이 같다. CLEAR 패널 "▶ 리플레이 ×2"가 이 씬을 연다)
 - 효과음: `Sfx.play(name)`(SFX 버스, 코드 합성). 새 소리는 `autoload/sfx.gd`의 streams에 추가.
 
 ## 화면 흐름·저장·모바일·웹 빌드
@@ -224,6 +226,7 @@ R과 Shift+R이 겹치므로 `end_loop`는 반드시 exact match로 검사한다
 다음(플레이 테스트 결과를 보고 결정, 레벨 배치·퍼즐 수치는 그때 바꾼다)
 - [ ] 친구 플레이 테스트 → playtest_report 표 → 5분 넘는 스테이지 힌트·배치 수정, docs/levels.md 갱신
 - [ ] itch.io 업로드(사람이 한다), 릴스 시리즈 업로드
-- [ ] BACKLOG의 열린 항목(★2 구간, 2-1 발판 대기, 클리어 리플레이 게임 안 2배속 등)
+- [x] 클리어 리플레이 게임 안 2배속(CLEAR 패널 버튼, 결과가 1배속과 같음)
+- [ ] BACKLOG의 열린 항목(★2 구간, 2-1 발판 대기 등)
 
 미뤄 둔 결정·알려진 한계는 docs/BACKLOG.md.

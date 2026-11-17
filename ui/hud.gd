@@ -3,6 +3,9 @@ extends CanvasLayer
 ## 남은 시간 바, "LOOP n" / "나 ×n" 두 줄, 고스트 슬롯, 루프 타임라인, 클리어 표시.
 ## 게임 상태는 읽기만 하므로 _process(연출)에서 갱신한다.
 
+## CLEAR 패널의 "리플레이 2배속" 버튼을 눌렀을 때(메뉴에서 들어온 게임에서만 보인다).
+signal replay_requested
+
 @export var loop_manager: LoopManager
 @export var player: Player
 @export var warning_seconds: float = 3.0
@@ -26,6 +29,7 @@ var _last_tick_second: int = -1
 @onready var _hint_label: Label = $ClearPanel/HintLabel
 
 var hints: Hints
+var replay_button: Button
 var _clear_stars: StarIcons
 var _clear_record: Label
 var _clear_shown: bool = false
@@ -52,6 +56,18 @@ func _ready() -> void:
 	_clear_panel.add_child(_clear_record)
 	_hint_label.offset_top = 175.0
 	_hint_label.offset_bottom = 225.0
+	replay_button = Button.new()
+	replay_button.name = "ReplayButton"
+	replay_button.text = "▶  리플레이 ×2"
+	replay_button.focus_mode = Control.FOCUS_NONE
+	replay_button.visible = false
+	replay_button.position = Vector2(220, 880)
+	replay_button.size = Vector2(280, 64)
+	replay_button.add_theme_font_override("font", load("res://assets/fonts/hud_font.tres"))
+	replay_button.add_theme_font_size_override("font_size", 30)
+	replay_button.add_theme_color_override("font_color", Palette.EXIT)
+	replay_button.pressed.connect(func() -> void: replay_requested.emit())
+	_clear_panel.add_child(replay_button)
 	# 첫 플레이 안내(릴스 텍스트 자리). HUD 안이라 릴스 모드에서 함께 숨는다.
 	hints = Hints.new()
 	hints.name = "Hints"
@@ -103,3 +119,4 @@ func _show_clear_result() -> void:
 		_clear_stars.count = Stages.stars_for(ghosts, s["max"], s["record"])
 		_clear_record.text = "고스트 %d명 · ★3 기준 %d명 이하" % [ghosts, s["record"]]
 	_hint_label.text = "R 다시 · E 다음 스테이지 · Esc 선택" if menu_mode else "R: 다시 시작"
+	replay_button.visible = menu_mode

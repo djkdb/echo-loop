@@ -19,6 +19,8 @@ extends AnimatableBody2D
 @export var speed: float = 120.0
 
 var _sources: Array[Node] = []
+## 초당 틱 수는 시작할 때 한 번만 읽는다. 리플레이 2배속(틱 120 + time_scale 2)에서도 틱당 이동량이 같아야 한다.
+var _tick_rate: float = 60.0
 var _start: Vector2 = Vector2.ZERO
 var _active_ticks: int = 0
 ## 이번 틱에 가기로 한 위치(sync_to_physics라 global_position은 물리 스텝 뒤에 따라온다).
@@ -32,6 +34,7 @@ func _ready() -> void:
 	sync_to_physics = true
 	add_to_group("resettable")
 	_sources = SignalSources.resolve(self, sources)
+	_tick_rate = float(Engine.physics_ticks_per_second)
 	_start = global_position
 	_pos = _start
 	_visual.visible = false
@@ -111,7 +114,7 @@ func _position_at(ticks: int) -> Vector2:
 	var length: float = travel.length()
 	if length == 0.0:
 		return _start
-	var distance: float = speed * float(ticks) / float(Engine.physics_ticks_per_second)
+	var distance: float = speed * float(ticks) / _tick_rate
 	return _start + travel / length * pingpong(distance, length)
 
 

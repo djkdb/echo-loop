@@ -5,6 +5,7 @@ extends Node2D
 
 const SELECT_SCENE: String = "res://ui/stage_select.tscn"
 const GAME_SCENE: String = "res://game/main.tscn"
+const REPLAY_SCENE: String = "res://game/replay.tscn"
 
 @export var level_scene: PackedScene
 
@@ -23,6 +24,7 @@ func _ready() -> void:
 		level_scene = load(Stages.path(Progress.pending_stage))
 		from_menu = true
 	_hud.menu_mode = from_menu
+	_hud.replay_requested.connect(open_replay)
 	load_level(level_scene)
 
 
@@ -35,6 +37,12 @@ func _unhandled_input(event: InputEvent) -> void:
 	elif _loop_manager.cleared and event.is_action_pressed("interact"):
 		get_viewport().set_input_as_handled()
 		next_stage()
+
+
+## 방금 CLEAR한 루프들을 리플레이 씬에서 2배속으로 본다(돌아오면 스테이지 선택 화면).
+func open_replay() -> void:
+	Replay.request = {"stage": stage_id(), "speed": 2}
+	get_tree().change_scene_to_file(REPLAY_SCENE)
 
 
 ## CLEAR 뒤 다음 스테이지로(마지막이면 선택 화면).
