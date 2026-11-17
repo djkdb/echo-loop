@@ -69,6 +69,9 @@ GODOT=/경로/Godot_v4.7.2-stable tools/render_reels.sh 2-2     # 또는 level_2
 - 정답 리플레이 보기(릴스 정답편 렌더):
   `godot --path . --write-movie out.avi --fixed-fps 60 res://game/replay.tscn -- --stage=level_2_2 --loops=1 --reels --solution`
 - 웹 빌드: `godot --headless --path . --export-release "Web" build/web/index.html` (4.7.2 export templates의 web_nothreads 필요)
+- itch.io 업로드용 zip: `GODOT=/경로/godot tools/package_web.sh` → 테스트 통과 확인 → `build/echo-loop-web-<버전>.zip`.
+  itch.io "HTML" 프로젝트에 올리고 "This file will be played in the browser", 뷰포트 720×1280(또는 360×640),
+  "Mobile friendly"·"Fullscreen button" 체크.
 
 ## 크레딧
 

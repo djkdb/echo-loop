@@ -102,7 +102,8 @@ res://
 │               fx/ (glow_texture·additive = 가산 글로우, rewind·glitch 셰이더)
 ├─ solutions/   <stage>.json (개발자 정답 리플레이 = 별 3개 기준, 내보내기에서 제외)
 ├─ tools/       subset_font.py(한글 폰트 서브셋), playtest_report.py(플레이 테스트 모아 보기),
-│               render_reels.sh + reels_problem.tscn/.gd + reels_copy.json(릴스 렌더) — 내보내기에서 제외
+│               render_reels.sh + reels_problem.tscn/.gd + reels_copy.json(릴스 렌더),
+│               package_web.sh(테스트 → 웹 빌드 → itch.io용 zip) — 내보내기에서 제외
 ├─ docs/        design.pdf(기획서), levels.md(레벨 설계 근거), BACKLOG.md
 └─ tests/       run_all.gd, test_base.gd, cases/test_*.gd (자동 테스트), solution_case.gd(정답 검증 공용),
                 bots/<stage>.gd (정답을 실제로 풀어 solutions/를 만드는 봇) — 모두 내보내기에서 제외
